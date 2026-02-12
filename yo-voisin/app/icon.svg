@@ -1,0 +1,31 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background transparent ou vert -->
+  <rect width="512" height="512" fill="#1B7A3D" rx="110"/>
+  
+  <!-- Smiley casqué centré et agrandi -->
+  <g transform="translate(256, 310) scale(3.5)">
+    <!-- Contour noir -->
+    <circle cx="0" cy="0" r="42" fill="#2D2D2A"/>
+    <!-- Cercle orange -->
+    <circle cx="0" cy="0" r="39" fill="#F37021"/>
+    <!-- Reflet -->
+    <ellipse cx="-14" cy="-18" rx="21" ry="16" fill="#FF8C42" opacity="0.4"/>
+    
+    <!-- Yeux -->
+    <ellipse cx="-14" cy="-12" rx="4.5" ry="6" fill="#2D2D2A"/>
+    <ellipse cx="14" cy="-12" rx="4.5" ry="6" fill="#2D2D2A"/>
+    
+    <!-- GRANDE BOUCHE -->
+    <path d="M-28,4 Q0,40 28,4" fill="#2D2D2A"/>
+    <path d="M-24,6 Q0,36 24,6" fill="#DC2626"/>
+    <rect x="-24" y="3" width="48" height="7" rx="2" fill="white"/>
+    
+    <!-- CASQUE JAUNE -->
+    <path d="M-44,-22 C-46,-42 -32,-58 0,-60 C32,-58 46,-42 44,-22 Z" fill="#FCD34D"/>
+    <path d="M-24,-50 C-8,-58 8,-58 24,-50 C10,-54 -10,-54 -24,-50 Z" fill="#FDE68A" opacity="0.7"/>
+    <line x1="0" y1="-60" x2="0" y2="-24" stroke="#D97706" stroke-width="3" opacity="0.2"/>
+    <path d="M-48,-22 L-52,-16 C-46,-10 -24,-6 0,-6 C24,-6 46,-10 52,-16 L48,-22 Z" fill="#D97706"/>
+    <rect x="-40" y="-30" width="80" height="8" rx="4" fill="#F37021"/>
+    <rect x="-40" y="-30" width="80" height="4" rx="2" fill="#FF8C42" opacity="0.5"/>
+  </g>
+</svg>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Générer Favicon Yo! Voiz</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f5f5f5; }
+    canvas { border: 1px solid #ccc; background: white; margin: 10px; }
+    .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+    button { background: #1B7A3D; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+    button:hover { background: #145C2E; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Générateur de Favicon Yo! Voiz</h1>
+    <p>Cliquez sur le bouton pour télécharger les favicons aux différentes tailles.</p>
+    
+    <canvas id="canvas64" width="64" height="64"></canvas>
+    <canvas id="canvas32" width="32" height="32"></canvas>
+    <canvas id="canvas16" width="16" height="16"></canvas>
+    
+    <br><br>
+    <button onclick="downloadAll()">Télécharger tous les favicons</button>
+  </div>
+
+  <script>
+    function drawFavicon(canvas, size) {
+      const ctx = canvas.getContext('2d');
+      const scale = size / 120;
+      
+      ctx.clearRect(0, 0, size, size);
+      ctx.save();
+      ctx.scale(scale, scale);
+      
+      // Ajuster le centrage pour 64x64
+      const offsetY = size === 64 ? -38 : (size === 32 ? -38 : -38);
+      ctx.translate(0, offsetY * scale);
+      
+      // Contour noir
+      ctx.beginPath();
+      ctx.arc(60, 78, 56, 0, Math.PI * 2);
+      ctx.fillStyle = '#2D2D2A';
+      ctx.fill();
+      
+      // Cercle orange
+      ctx.beginPath();
+      ctx.arc(60, 78, 52, 0, Math.PI * 2);
+      ctx.fillStyle = '#F37021';
+      ctx.fill();
+      
+      // Reflet
+      ctx.save();
+      ctx.globalAlpha = 0.4;
+      ctx.beginPath();
+      ctx.ellipse(42, 56, 28, 22, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#FF8C42';
+      ctx.fill();
+      ctx.restore();
+      
+      // Yeux
+      ctx.beginPath();
+      ctx.ellipse(42, 60, 6, 8, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#2D2D2A';
+      ctx.fill();
+      
+      ctx.beginPath();
+      ctx.ellipse(78, 60, 6, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Bouche (contour)
+      ctx.beginPath();
+      ctx.moveTo(28, 78);
+      ctx.quadraticCurveTo(60, 123, 92, 78);
+      ctx.fillStyle = '#2D2D2A';
+      ctx.fill();
+      
+      // Bouche (intérieur rouge - langue)
+      ctx.beginPath();
+      ctx.moveTo(32, 80);
+      ctx.quadraticCurveTo(60, 118, 88, 80);
+      ctx.fillStyle = '#DC2626';
+      ctx.fill();
+      
+      // Dents
+      ctx.fillStyle = 'white';
+      ctx.fillRect(32, 78, 56, 8);
+      
+      // CASQUE JAUNE
+      // Dôme
+      ctx.beginPath();
+      ctx.moveTo(10, 42);
+      ctx.bezierCurveTo(8, 14, 28, -4, 60, -6);
+      ctx.bezierCurveTo(92, -4, 112, 14, 110, 42);
+      ctx.closePath();
+      ctx.fillStyle = '#FCD34D';
+      ctx.fill();
+      
+      // Visière
+      ctx.beginPath();
+      ctx.moveTo(6, 42);
+      ctx.lineTo(2, 50);
+      ctx.bezierCurveTo(10, 58, 30, 62, 60, 62);
+      ctx.bezierCurveTo(90, 62, 110, 58, 118, 50);
+      ctx.lineTo(114, 42);
+      ctx.closePath();
+      ctx.fillStyle = '#D97706';
+      ctx.fill();
+      
+      // Bande réfléchissante
+      ctx.fillStyle = '#F37021';
+      ctx.fillRect(16, 32, 88, 8);
+      
+      ctx.restore();
+    }
+    
+    function downloadCanvas(canvas, filename) {
+      canvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+    }
+    
+    function downloadAll() {
+      downloadCanvas(document.getElementById('canvas64'), 'favicon-64x64.png');
+      setTimeout(() => downloadCanvas(document.getElementById('canvas32'), 'favicon-32x32.png'), 200);
+      setTimeout(() => downloadCanvas(document.getElementById('canvas16'), 'favicon-16x16.png'), 400);
+      alert('3 fichiers PNG téléchargés ! Utilisez un convertisseur en ligne pour créer le .ico');
+    }
+    
+    // Dessiner au chargement
+    window.onload = function() {
+      drawFavicon(document.getElementById('canvas64'), 64);
+      drawFavicon(document.getElementById('canvas32'), 32);
+      drawFavicon(document.getElementById('canvas16'), 16);
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+# ========================================
+# Configuration Twilio WhatsApp - Sandbox
+# ========================================
+# 
+# Instructions :
+# 1. Copier ce contenu dans un nouveau fichier ".env.local" à la racine du projet
+# 2. Remplacer les valeurs par vos vraies credentials Twilio
+# 3. NE JAMAIS commiter .env.local sur Git !
+#
+
+# Twilio Account SID (commence par AC...)
+# Trouvé dans : https://console.twilio.com/ → Account Info
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Twilio Auth Token (clé secrète)
+# Trouvé dans : https://console.twilio.com/ → Account Info → Auth Token (cliquer "Show")
+TWILIO_AUTH_TOKEN=votre_auth_token_secret_ici
+
+# Numéro WhatsApp Twilio Sandbox
+# Trouvé dans : Messaging → Try WhatsApp → "From" number
+# Format : +1 415 523 8886 (exemple, utiliser VOTRE numéro sandbox)
+TWILIO_WHATSAPP_NUMBER=+14155238886
+
+# ========================================
+# Configuration Supabase (déjà existante)
+# ========================================
+NEXT_PUBLIC_SUPABASE_URL=https://votre-projet.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=votre_cle_anon_key
+
+# ========================================
+# Environment
+# ========================================
+NODE_ENV=development

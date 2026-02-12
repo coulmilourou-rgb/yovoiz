@@ -1,0 +1,23 @@
+{
+  "name": "Yo! Voiz - Services entre voisins à Abidjan",
+  "short_name": "Yo! Voiz",
+  "description": "Trouvez un voisin de confiance pour tous vos services du quotidien à Abidjan",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1B7A3D",
+  "theme_color": "#1B7A3D",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml"
+    }
+  ]
+}

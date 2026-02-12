@@ -1,0 +1,58 @@
+# Instructions pour Activer l'Envoi WhatsApp Réel
+
+## Ajouter cette ligne dans votre .env.local :
+
+```
+NEXT_PUBLIC_ENABLE_REAL_WHATSAPP=true
+```
+
+## Fichier .env.local Complet :
+
+```env
+# ========================================
+# Configuration Twilio WhatsApp - Sandbox
+# ========================================
+TWILIO_ACCOUNT_SID=AC660822f5e7e2cafaf2e908a5a4b8ea9c
+TWILIO_AUTH_TOKEN=af7a8b9e73df75a3c6c4bc138857d049
+TWILIO_WHATSAPP_NUMBER=+18304940577
+
+# ========================================
+# Configuration Supabase
+# ========================================
+NEXT_PUBLIC_SUPABASE_URL=https://hfrmctsvpszqdizritoe.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhmcm1jdHN2cHN6cWRpenJpdG9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4NDY5NTMsImV4cCI6MjA4NjQyMjk1M30.OogMznnRcG-DKZs_bSkJ-Kuu9MKHtSnh0WN7wDTLYR4
+
+# ========================================
+# Mode d'Envoi WhatsApp
+# ========================================
+# true = Envoi réel via WhatsApp (PRODUCTION)
+# false = Afficher popup de debug (DÉVELOPPEMENT)
+NEXT_PUBLIC_ENABLE_REAL_WHATSAPP=true
+
+# Environment
+NODE_ENV=development
+```
+
+## Étapes :
+
+1. Ouvrez .env.local avec Notepad :
+   ```powershell
+   notepad .env.local
+   ```
+
+2. Ajoutez cette ligne (avant NODE_ENV) :
+   ```
+   NEXT_PUBLIC_ENABLE_REAL_WHATSAPP=true
+   ```
+
+3. Sauvegardez (Ctrl+S)
+
+4. Redémarrez le serveur :
+   - Ctrl+C dans le terminal
+   - `npm run dev`
+
+## Résultat :
+
+- ❌ Plus de popup
+- ✅ Envoi WhatsApp réel
+- ✅ Code reçu sur votre téléphone
