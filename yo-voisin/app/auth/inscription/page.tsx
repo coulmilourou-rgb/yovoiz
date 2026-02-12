@@ -21,10 +21,9 @@ import Step5Bienvenue from '@/components/auth/signup-steps/Step5Bienvenue';
 const STEPS = [
   { number: 1, title: 'Rôle', description: 'Qui êtes-vous ?' },
   { number: 2, title: 'Infos', description: 'Vos coordonnées' },
-  { number: 3, title: 'Téléphone', description: 'Vérification SMS' },
-  { number: 4, title: 'Localisation', description: 'Où habitez-vous ?' },
-  { number: 5, title: 'Vérification', description: 'CNI + Selfie' },
-  { number: 6, title: 'Bienvenue', description: 'C\'est terminé !' },
+  { number: 3, title: 'Localisation', description: 'Où habitez-vous ?' },
+  { number: 4, title: 'Vérification', description: 'CNI + Selfie' },
+  { number: 5, title: 'Bienvenue', description: 'C\'est terminé !' },
 ];
 
 export interface SignupData {
@@ -65,7 +64,7 @@ export default function InscriptionPage() {
   };
 
   const goToNextStep = () => {
-    if (currentStep < 6) {
+    if (currentStep < 5) {
       setCurrentStep(prev => prev + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -129,12 +128,10 @@ export default function InscriptionPage() {
       case 2:
         return <Step2Infos {...props} />;
       case 3:
-        return <Step2_5VerifyPhone {...props} />;
-      case 4:
         return <Step3Localisation {...props} />;
-      case 5:
+      case 4:
         return <Step4Verification {...props} onSubmit={handleSubmit} loading={loading} />;
-      case 6:
+      case 5:
         return <Step5Bienvenue role={formData.role} name={formData.first_name} />;
       default:
         return null;
@@ -189,7 +186,7 @@ export default function InscriptionPage() {
         </Card>
 
         {/* Footer Links */}
-        {currentStep < 5 && (
+        {currentStep < 4 && (
           <div className="mt-6 text-center space-y-3">
             <p className="text-white/80 text-sm">
               Déjà un compte ?{' '}

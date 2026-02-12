@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
+import { VideoModal } from '@/components/features/VideoModal';
 import { CATEGORIES, COMMUNES } from '@/lib/constants';
 import { 
   Search, Wrench, Lock, CheckCircle, Star, 
@@ -19,12 +20,20 @@ import {
 } from 'lucide-react';
 
 export default function Home() {
+  const [showVideoModal, setShowVideoModal] = useState(false);
+
   return (
     <main className="min-h-screen">
       <Navbar isConnected={false} />
 
       {/* HERO SECTION AMÉLIORÉ */}
-      <HeroSection />
+      <HeroSection onOpenVideo={() => setShowVideoModal(true)} />
+      
+      {/* MODAL VIDÉO */}
+      <VideoModal 
+        isOpen={showVideoModal} 
+        onClose={() => setShowVideoModal(false)} 
+      />
 
       {/* STATISTIQUES DE CONFIANCE */}
       <StatsSection />
@@ -165,7 +174,7 @@ function RecentRequestsSection() {
 }
 
 // ========== HERO SECTION ==========
-function HeroSection() {
+function HeroSection({ onOpenVideo }: { onOpenVideo: () => void }) {
   const [searchValue, setSearchValue] = useState('');
   const [selectedCity, setSelectedCity] = useState(COMMUNES[6]); // Cocody par défaut
 
@@ -303,11 +312,14 @@ function HeroSection() {
             <Wrench className="w-5 h-5" />
             Devenir prestataire
           </Button>
-          <button className="flex items-center gap-2 text-white hover:text-white/80 transition group">
+          <button 
+            onClick={onOpenVideo}
+            className="flex items-center gap-2 text-white hover:text-white/80 transition group"
+          >
             <div className="w-12 h-12 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center backdrop-blur-md transition group-hover:scale-110">
               <Play className="w-5 h-5 ml-1" />
             </div>
-            <span className="font-semibold">Voir comment ça marche</span>
+            <span className="font-semibold">Découvre Yo! Voiz en vidéo</span>
           </button>
         </motion.div>
 

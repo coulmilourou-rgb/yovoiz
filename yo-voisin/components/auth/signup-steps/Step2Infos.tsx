@@ -1,5 +1,17 @@
 'use client';
 
+/**
+ * ⚠️ MODE DÉVELOPPEMENT ACTIVÉ
+ * 
+ * La vérification OTP WhatsApp est temporairement désactivée pour faciliter les tests.
+ * Le téléphone est automatiquement marqué comme vérifié (ligne 106).
+ * 
+ * 🔄 Pour réactiver l'OTP WhatsApp en production :
+ * 1. Restaurer l'étape 3 (Step2_5VerifyPhone) dans le flux d'inscription
+ * 2. Retirer la ligne : updateFormData({ phoneVerified: true })
+ * 3. Configurer Twilio WhatsApp Sender dans les variables d'environnement
+ */
+
 import { useState } from 'react';
 import { AlertCircle, Eye, EyeOff, CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -102,6 +114,9 @@ export default function Step2Infos({
         return;
       }
 
+      // ✅ MODE DÉVELOPPEMENT : Marquer automatiquement le téléphone comme vérifié
+      updateFormData({ phoneVerified: true });
+      
       goToNextStep();
     } catch (err) {
       setError('Erreur lors de la vérification. Réessayez.');
