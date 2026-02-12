@@ -105,6 +105,11 @@ export default function InscriptionPage() {
         return;
       }
 
+      // Sauvegarder l'email pour la page de confirmation
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('pending_email_confirmation', formData.email);
+      }
+
       goToNextStep();
     } catch (err) {
       setError('Une erreur inattendue est survenue');

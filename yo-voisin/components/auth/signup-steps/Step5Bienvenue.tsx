@@ -19,7 +19,17 @@ export default function Step5Bienvenue({ role, name }: Step5Props) {
   useEffect(() => {
     const timer = setTimeout(() => setShowConfetti(false), 5000);
     return () => clearTimeout(timer);
-  }, []);
+    
+    // Redirection automatique vers la page de confirmation email après 3 secondes
+    const redirectTimer = setTimeout(() => {
+      router.push('/auth/confirm-email');
+    }, 3000);
+    
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(redirectTimer);
+    };
+  }, [router]);
 
   const getRoleText = () => {
     switch (role) {
@@ -98,14 +108,24 @@ export default function Step5Bienvenue({ role, name }: Step5Props) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-          <div className="bg-white rounded-xl p-5 border border-yo-gray-200">
-            <div className="text-3xl mb-3">📧</div>
-            <h4 className="font-bold text-yo-gray-800 mb-1">Email de confirmation</h4>
-            <p className="text-sm text-yo-gray-600">
-              Vérifiez votre boîte mail pour activer votre compte
-            </p>
+        <div className="bg-yo-orange/10 border border-yo-orange rounded-yo-lg p-6 text-left">
+          <div className="flex items-start gap-4">
+            <div className="text-4xl shrink-0">📧</div>
+            <div>
+              <h4 className="font-bold text-yo-gray-900 mb-2 text-lg">
+                ⚠️ Confirmez votre email maintenant
+              </h4>
+              <p className="text-yo-gray-700 mb-3">
+                Un email de confirmation a été envoyé à votre adresse. Vous devez confirmer votre email avant de pouvoir vous connecter.
+              </p>
+              <p className="text-sm text-yo-gray-600 bg-white rounded-yo-md p-3">
+                💡 <strong>Astuce :</strong> Vérifiez aussi vos spams si vous ne voyez pas l&apos;email dans votre boîte de réception.
+              </p>
+            </div>
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
           <div className="bg-white rounded-xl p-5 border border-yo-gray-200">
             <div className="text-3xl mb-3">🔒</div>
             <h4 className="font-bold text-yo-gray-800 mb-1">Compte sécurisé</h4>
@@ -117,7 +137,7 @@ export default function Step5Bienvenue({ role, name }: Step5Props) {
             <div className="text-3xl mb-3">🚀</div>
             <h4 className="font-bold text-yo-gray-800 mb-1">Prêt à commencer</h4>
             <p className="text-sm text-yo-gray-600">
-              Explorez toutes les fonctionnalités maintenant
+              Après confirmation, explorez toutes les fonctionnalités
             </p>
           </div>
         </div>
@@ -131,11 +151,11 @@ export default function Step5Bienvenue({ role, name }: Step5Props) {
       >
         <Button
           size="lg"
-          onClick={() => router.push('/home')}
+          onClick={() => router.push('/auth/confirm-email')}
           className="min-w-[250px] bg-gradient-to-r from-yo-green to-yo-green-dark hover:from-yo-green-dark hover:to-yo-green"
         >
           <Sparkles className="w-5 h-5" />
-          {roleInfo.nextStep}
+          Aller confirmer mon email
           <ArrowRight className="w-5 h-5" />
         </Button>
       </motion.div>
@@ -146,10 +166,7 @@ export default function Step5Bienvenue({ role, name }: Step5Props) {
         transition={{ delay: 1 }}
         className="text-sm text-yo-gray-500 pt-6"
       >
-        Besoin d'aide ? Contactez notre support à{' '}
-        <a href="mailto:support@yovoiz.ci" className="text-yo-green font-semibold hover:underline">
-          support@yovoiz.ci
-        </a>
+        Redirection automatique dans 3 secondes...
       </motion.p>
     </div>
   );
