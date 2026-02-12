@@ -7,16 +7,19 @@ import { useRouter } from 'next/navigation';
 
 interface Profile {
   id: string;
-  role: 'demandeur' | 'prestataire' | 'both';
-  first_name: string;
-  last_name: string;
-  phone: string;
-  commune: string;
+  user_type?: 'client' | 'provider' | 'both';
+  full_name?: string;
+  phone?: string;
+  commune?: string;
   quartier?: string;
+  address_details?: string;
   avatar_url?: string;
   bio?: string;
-  verification_status: 'pending' | 'submitted' | 'verified' | 'rejected';
-  created_at: string;
+  verification_status?: 'pending' | 'submitted' | 'verified' | 'rejected';
+  email_verified?: boolean;
+  phone_verified?: boolean;
+  profile_completed?: boolean;
+  created_at?: string;
 }
 
 interface AuthContextType {
@@ -130,13 +133,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .insert([
             {
               id: data.user.id,
-              role: userData.role || 'demandeur',
-              first_name: userData.first_name,
-              last_name: userData.last_name,
+              user_type: userData.role || 'client',
+              full_name: `${userData.first_name} ${userData.last_name}`,
               phone: userData.phone,
               commune: userData.commune,
               quartier: userData.quartier,
               verification_status: 'pending',
+              email_verified: false,
+              phone_verified: true,
+              profile_completed: true,
             },
           ]);
 
