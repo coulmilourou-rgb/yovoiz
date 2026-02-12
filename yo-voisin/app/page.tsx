@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/Button';
@@ -9,58 +9,169 @@ import { Card } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { CATEGORIES, COMMUNES } from '@/lib/constants';
-import { VideoModal, VideoTrigger } from '@/components/features/VideoModal';
-import { LiveChat } from '@/components/features/LiveChat';
-import { ScrollToTop } from '@/components/features/ScrollToTop';
-import { LiveNotifications } from '@/components/features/LiveNotifications';
 import { 
   Search, Wrench, Lock, CheckCircle, Star, 
   MapPin, ChevronDown, Play, TrendingUp,
   Users, Shield, Award, Clock, MessageCircle,
-  Phone, Mail, Facebook, Instagram, Smartphone,
-  Gift, BookOpen, Trophy, Target, Zap
+  Phone, Mail, Facebook, Instagram, Twitter,
+  HeartHandshake, Sparkles, ArrowRight, ChevronRight,
+  Zap, Target
 } from 'lucide-react';
 
 export default function Home() {
-  const [isVideoOpen, setIsVideoOpen] = useState(false);
-
   return (
     <main className="min-h-screen">
       <Navbar isConnected={false} />
 
-      <HeroSection onVideoClick={() => setIsVideoOpen(true)} />
-      <StatsSection />
-      <VideoSection onVideoClick={() => setIsVideoOpen(true)} />
-      <HowItWorksSection />
-      <ProviderOfTheMonthSection />
-      <TopProvidersSection />
-      <WhyYoVoisinSection />
-      <PromoSection />
-      <CategoriesSection />
-      <MobileAppSection />
-      <TestimonialsSection />
-      <CommunesMapSection />
-      <BlogPreviewSection />
-      <FAQSection />
-      <FinalCTASection />
-      <Footer />
+      {/* HERO SECTION AMÉLIORÉ */}
+      <HeroSection />
 
-      {/* Widgets */}
-      <VideoModal isOpen={isVideoOpen} onClose={() => setIsVideoOpen(false)} />
-      <LiveChat />
-      <ScrollToTop />
-      <LiveNotifications />
+      {/* STATISTIQUES DE CONFIANCE */}
+      <StatsSection />
+
+      {/* DEMANDES RÉCENTES */}
+      <RecentRequestsSection />
+
+      {/* COMMENT ÇA MARCHE */}
+      <HowItWorksSection />
+
+      {/* TOP PRESTATAIRES */}
+      <TopProvidersSection />
+
+      {/* POURQUOI YO! VOISIN */}
+      <WhyYoVoisinSection />
+
+      {/* SERVICES POPULAIRES */}
+      <CategoriesSection />
+
+      {/* AVANTAGES COMPÉTITIFS */}
+      <CompetitiveAdvantagesSection />
+
+      {/* TÉMOIGNAGES */}
+      <TestimonialsSection />
+
+      {/* FAQ */}
+      <FAQSection />
+
+      {/* PARTENAIRES ET CERTIFICATIONS */}
+      <PartnersSection />
+
+      {/* CTA FINAL */}
+      <FinalCTASection />
+
+      {/* FOOTER */}
+      <Footer />
     </main>
   );
 }
 
+// ========== RECENT REQUESTS SECTION ==========
+function RecentRequestsSection() {
+  const requests = [
+    {
+      title: 'Ménage complet appartement 3 pièces',
+      commune: 'Cocody',
+      category: 'Ménage',
+      budget: '15.000 - 20.000 FCFA',
+      time: 'Il y a 12 min',
+      proposals: 8,
+      urgent: true,
+    },
+    {
+      title: 'Réparation fuite robinet cuisine',
+      commune: 'Marcory',
+      category: 'Plomberie',
+      budget: '10.000 - 15.000 FCFA',
+      time: 'Il y a 34 min',
+      proposals: 5,
+      urgent: false,
+    },
+    {
+      title: 'Cours de soutien maths lycée',
+      commune: 'Plateau',
+      category: 'Soutien scolaire',
+      budget: '25.000 FCFA/mois',
+      time: 'Il y a 1h',
+      proposals: 12,
+      urgent: false,
+    },
+  ];
+
+  const [ref, inView] = useInView({ triggerOnce: true });
+
+  return (
+    <section ref={ref} className="py-16 px-6 bg-white border-y border-yo-gray-200">
+      <div className="max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          className="flex items-center justify-between mb-8"
+        >
+          <div>
+            <h2 className="font-display font-extrabold text-3xl text-yo-green-dark mb-2">
+              Dernières demandes publiées
+            </h2>
+            <p className="text-yo-gray-500">Des voisins cherchent un prestataire maintenant</p>
+          </div>
+          <Button variant="outline" className="hidden md:flex">
+            Voir toutes les demandes
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {requests.map((request, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Card className="hover:shadow-yo-lg transition-all cursor-pointer hover:-translate-y-1">
+                <div className="flex items-start justify-between mb-3">
+                  <Badge variant={request.urgent ? 'success' : 'default'}>
+                    {request.urgent ? '🔥 Urgent' : request.category}
+                  </Badge>
+                  <span className="text-xs text-yo-gray-400">{request.time}</span>
+                </div>
+                <h3 className="font-bold text-lg mb-2 line-clamp-2">{request.title}</h3>
+                <div className="flex items-center gap-2 text-sm text-yo-gray-500 mb-3">
+                  <MapPin className="w-4 h-4" />
+                  <span>{request.commune}</span>
+                </div>
+                <div className="flex items-center justify-between pt-3 border-t border-yo-gray-200">
+                  <span className="font-bold text-yo-orange">{request.budget}</span>
+                  <span className="text-sm text-yo-gray-500">{request.proposals} propositions</span>
+                </div>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : {}}
+          transition={{ delay: 0.4 }}
+          className="text-center mt-8 md:hidden"
+        >
+          <Button variant="outline" className="w-full">
+            Voir toutes les demandes
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
 // ========== HERO SECTION ==========
-function HeroSection({ onVideoClick }: { onVideoClick: () => void }) {
+function HeroSection() {
   const [searchValue, setSearchValue] = useState('');
   const [selectedCity, setSelectedCity] = useState(COMMUNES[6]); // Cocody par défaut
 
   return (
     <section className="relative bg-gradient-to-br from-yo-green-dark via-yo-green to-yo-green-light py-24 px-6 overflow-hidden">
+      {/* Cercles décoratifs animés */}
       <motion.div 
         className="absolute top-0 right-0 w-96 h-96 bg-yo-orange/10 rounded-full blur-3xl"
         animate={{ 
@@ -70,9 +181,18 @@ function HeroSection({ onVideoClick }: { onVideoClick: () => void }) {
         }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       />
+      <motion.div 
+        className="absolute bottom-0 left-0 w-80 h-80 bg-yo-orange/5 rounded-full blur-2xl"
+        animate={{ 
+          scale: [1, 1.1, 1],
+          x: [0, -30, 0],
+        }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+      />
       
       <div className="relative z-10 max-w-7xl mx-auto">
         <div className="text-center mb-12">
+          {/* Badge 100% Ivoirien */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -83,49 +203,60 @@ function HeroSection({ onVideoClick }: { onVideoClick: () => void }) {
             <span>100% Ivoirien • Abidjan</span>
           </motion.div>
 
+          {/* Titre principal avec animation */}
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="font-display font-black text-5xl md:text-7xl text-white mb-6"
+            className="font-display font-black text-5xl md:text-7xl text-white mb-6 leading-tight"
           >
             On dit quoi ? 👋
+            <br />
+            <span className="text-yo-orange">Ton voisin est là !</span>
           </motion.h1>
           
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-white/90 text-xl md:text-2xl mb-10 max-w-3xl mx-auto"
+            className="text-white/90 text-xl md:text-2xl mb-10 max-w-3xl mx-auto leading-relaxed"
           >
-            Trouve un voisin de confiance pour tous tes services du quotidien à Abidjan
+            Trouve un voisin de confiance pour <strong>tous tes services du quotidien</strong> à Abidjan
+            <br />
+            <span className="text-lg text-white/80">Ménage • Bricolage • Cours • Livraisons • Et bien plus !</span>
           </motion.p>
         </div>
 
+        {/* Barre de recherche améliorée */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
           className="max-w-4xl mx-auto mb-8"
         >
-          <div className="bg-white rounded-full shadow-yo-xl p-2 flex flex-col md:flex-row gap-2">
-            <div className="flex-1 flex items-center gap-3 px-4">
-              <Search className="w-5 h-5 text-yo-gray-400" />
+          <div className="bg-white rounded-2xl shadow-2xl p-2 flex flex-col md:flex-row gap-2">
+            {/* Service */}
+            <div className="flex-1 flex items-center gap-3 px-4 py-2">
+              <Search className="w-5 h-5 text-yo-gray-400 shrink-0" />
               <input
                 type="text"
                 placeholder="Quel service cherches-tu ? (ex: ménage, bricolage...)"
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
-                className="w-full outline-none text-yo-gray-800 placeholder:text-yo-gray-400"
+                className="w-full outline-none text-yo-gray-800 placeholder:text-yo-gray-400 text-base"
               />
             </div>
-            <div className="hidden md:block w-px bg-yo-gray-200" />
-            <div className="flex items-center gap-2 px-4 md:w-48">
-              <MapPin className="w-5 h-5 text-yo-gray-400" />
+
+            {/* Séparateur */}
+            <div className="hidden md:block w-px bg-yo-gray-200 my-2" />
+
+            {/* Commune */}
+            <div className="flex items-center gap-2 px-4 py-2 md:w-48">
+              <MapPin className="w-5 h-5 text-yo-gray-400 shrink-0" />
               <select 
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
-                className="outline-none text-yo-gray-800 bg-transparent cursor-pointer w-full"
+                className="outline-none text-yo-gray-800 bg-transparent cursor-pointer w-full font-medium"
               >
                 {COMMUNES.map((commune) => (
                   <option key={commune} value={commune}>
@@ -133,30 +264,72 @@ function HeroSection({ onVideoClick }: { onVideoClick: () => void }) {
                   </option>
                 ))}
               </select>
+              <ChevronDown className="w-4 h-4 text-yo-gray-400" />
             </div>
-            <Button size="lg" variant="secondary" className="shrink-0">
+
+            {/* Bouton */}
+            <Button size="lg" variant="secondary" className="shrink-0 font-bold shadow-yo-md hover:shadow-yo-lg transition-all">
               Rechercher
             </Button>
           </div>
+
+          {/* Suggestions rapides */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1 }}
+            className="flex flex-wrap justify-center gap-2 mt-4"
+          >
+            <span className="text-white/70 text-sm">Populaires :</span>
+            {['Ménage', 'Plomberie', 'Cours particuliers', 'Déménagement'].map((term) => (
+              <button
+                key={term}
+                className="px-3 py-1 bg-white/20 hover:bg-white/30 text-white text-sm rounded-full backdrop-blur-sm transition"
+              >
+                {term}
+              </button>
+            ))}
+          </motion.div>
         </motion.div>
 
+        {/* CTAs secondaires */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
           className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
-          <Button size="lg" className="bg-white text-yo-green-dark hover:bg-white/90">
+          <Button size="lg" className="bg-white text-yo-green-dark hover:bg-white/90 shadow-xl hover:scale-105 transition-transform">
             <Wrench className="w-5 h-5" />
             Devenir prestataire
           </Button>
-          <button 
-            onClick={onVideoClick}
-            className="flex items-center gap-2 text-white hover:text-white/80 transition"
-          >
-            <Play className="w-5 h-5" />
+          <button className="flex items-center gap-2 text-white hover:text-white/80 transition group">
+            <div className="w-12 h-12 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center backdrop-blur-md transition group-hover:scale-110">
+              <Play className="w-5 h-5 ml-1" />
+            </div>
             <span className="font-semibold">Voir comment ça marche</span>
           </button>
+        </motion.div>
+
+        {/* Trust indicators */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+          className="flex flex-wrap justify-center gap-6 mt-12 text-white/80 text-sm"
+        >
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-yo-orange" />
+            <span>Inscription 100% gratuite</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Shield className="w-5 h-5 text-yo-orange" />
+            <span>Paiement sécurisé</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Award className="w-5 h-5 text-yo-orange" />
+            <span>Profils vérifiés</span>
+          </div>
         </motion.div>
       </div>
     </section>
@@ -169,17 +342,17 @@ function StatsSection() {
     <section className="py-12 bg-white border-b border-yo-gray-200">
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          <StatItem number={2547} suffix="+" label="Utilisateurs actifs" />
-          <StatItem number={3890} suffix="+" label="Services réalisés" />
-          <StatItem number={4.9} suffix="/5" label="Note moyenne" icon="⭐" />
-          <StatItem number={96} suffix="%" label="Satisfaction client" />
+          <StatItem number={847} suffix="+" label="Utilisateurs actifs" />
+          <StatItem number={1240} suffix="+" label="Services réalisés" />
+          <StatItem number={4.8} suffix="/5" label="Note moyenne" icon="⭐" />
+          <StatItem number={98} suffix="%" label="Satisfaction client" />
         </div>
       </div>
     </section>
   );
 }
 
-function StatItem({ number, suffix, label, icon }: any) {
+function StatItem({ number, suffix, label, icon }: { number: number; suffix: string; label: string; icon?: string }) {
   const [count, setCount] = useState(0);
   const [ref, inView] = useInView({ triggerOnce: true });
 
@@ -214,46 +387,18 @@ function StatItem({ number, suffix, label, icon }: any) {
     </div>
   );
 }
-// ========== VIDEO SECTION ==========
-function VideoSection({ onVideoClick }: { onVideoClick: () => void }) {
-  const [ref, inView] = useInView({ triggerOnce: true });
-
-  return (
-    <section ref={ref} className="py-20 px-6 bg-yo-gray-50">
-      <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          className="text-center mb-12"
-        >
-          <h2 className="font-display font-extrabold text-4xl text-yo-green-dark mb-4">
-            Découvre Yo! Voiz en 2 minutes
-          </h2>
-          <p className="text-yo-gray-500 text-lg">Tout ce que tu dois savoir, expliqué simplement</p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={inView ? { opacity: 1, scale: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <VideoTrigger onClick={onVideoClick} />
-        </motion.div>
-      </div>
-    </section>
-  );
-}
 
 // ========== HOW IT WORKS ==========
 function HowItWorksSection() {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
 
   return (
-    <section ref={ref} className="py-20 px-6 bg-white">
+    <section ref={ref} className="py-20 px-6 bg-yo-gray-50">
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
           <h2 className="font-display font-extrabold text-4xl text-yo-green-dark mb-4">
@@ -274,14 +419,8 @@ function HowItWorksSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="bg-yo-gray-50 rounded-yo-lg shadow-yo-sm p-6 text-center hover:shadow-yo-md transition-all hover:-translate-y-1"
             >
-              <div className="text-5xl mb-4">{step.emoji}</div>
-              <div className="inline-block w-10 h-10 bg-yo-green text-white rounded-full flex items-center justify-center font-bold mb-3">
-                {index + 1}
-              </div>
-              <h3 className="font-bold text-lg mb-2">{step.title}</h3>
-              <p className="text-yo-gray-500 text-sm">{step.desc}</p>
+              <StepCard number={String(index + 1)} {...step} />
             </motion.div>
           ))}
         </div>
@@ -290,68 +429,28 @@ function HowItWorksSection() {
   );
 }
 
-// ========== PROVIDER OF THE MONTH ==========
-function ProviderOfTheMonthSection() {
-  const [ref, inView] = useInView({ triggerOnce: true });
-
+function StepCard({ number, emoji, title, desc }: { number: string; emoji: string; title: string; desc: string }) {
   return (
-    <section ref={ref} className="py-20 px-6 bg-gradient-to-br from-yo-orange via-yo-orange-dark to-yo-orange-light text-white relative overflow-hidden">
-      <div className="absolute inset-0 opacity-10" style={{
-        backgroundImage: 'radial-gradient(circle, white 2px, transparent 2px)',
-        backgroundSize: '40px 40px',
-      }} />
-      
-      <div className="max-w-5xl mx-auto relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center gap-2 bg-white/20 px-6 py-2 rounded-full mb-6">
-            <Trophy className="w-5 h-5" />
-            <span className="font-bold">Prestataire du mois</span>
-          </div>
-          <h2 className="font-display font-black text-5xl mb-4">
-            Aminata K. - La Reine du Ménage 👑
-          </h2>
-          <p className="text-xl text-white/90">245 missions • Note 4.9/5 • 98% de satisfaction</p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={inView ? { opacity: 1, scale: 1 } : {}}
-          transition={{ delay: 0.2 }}
-          className="bg-white/10 backdrop-blur-md rounded-yo-xl p-8 flex flex-col md:flex-row items-center gap-8"
-        >
-          <div className="flex-shrink-0">
-            <Avatar firstName="Aminata" lastName="K." size="xl" verified />
-          </div>
-          <div className="flex-1 text-center md:text-left">
-            <p className="text-lg mb-6 leading-relaxed">
-              "Depuis que j'ai rejoint Yo! Voiz, ma vie a changé. Je reçois des demandes régulières, les clients sont respectueux et le paiement Mobile Money c'est trop pratique. Merci Yo! Voiz ! 🙏"
-            </p>
-            <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-              <Badge variant="status" className="bg-white/20 text-white">⭐ 4.9/5</Badge>
-              <Badge variant="status" className="bg-white/20 text-white">245 missions</Badge>
-              <Badge variant="status" className="bg-white/20 text-white">Cocody</Badge>
-            </div>
-          </div>
-        </motion.div>
+    <div className="bg-white rounded-yo-lg shadow-yo-md p-6 text-center hover:shadow-yo-lg transition-all hover:-translate-y-1">
+      <div className="text-5xl mb-4">{emoji}</div>
+      <div className="inline-block w-10 h-10 bg-yo-green text-white rounded-full flex items-center justify-center font-bold mb-3">
+        {number}
       </div>
-    </section>
+      <h3 className="font-bold text-lg mb-2">{title}</h3>
+      <p className="text-yo-gray-500 text-sm">{desc}</p>
+    </div>
   );
 }
 
 // ========== TOP PROVIDERS ==========
 function TopProvidersSection() {
-  const [ref, inView] = useInView({ triggerOnce: true });
-
   const providers = [
-    { name: 'Aminata K.', service: 'Ménage', rating: 4.9, missions: 245, commune: 'Cocody', badge: 'PLATINE', verified: true },
-    { name: 'Ibrahim T.', service: 'Bricolage', rating: 4.8, missions: 189, commune: 'Marcory', badge: 'OR', verified: true },
-    { name: 'Fatou D.', service: 'Livraison', rating: 4.9, missions: 312, commune: 'Plateau', badge: 'PLATINE', verified: true },
-    { name: 'Kouassi M.', service: 'Plomberie', rating: 4.7, missions: 156, commune: 'Yopougon', badge: 'OR', verified: true },
+    { name: 'Aminata', initial: 'A', service: 'Ménage', rating: 4.9, missions: 87, hourly: 5000, verified: true },
+    { name: 'Kouassi', initial: 'K', service: 'Bricolage', rating: 4.8, missions: 64, hourly: 8000, verified: true },
+    { name: 'Fatou', initial: 'F', service: 'Gouvernante', rating: 5.0, missions: 120, hourly: 6000, verified: true },
   ];
+
+  const [ref, inView] = useInView({ triggerOnce: true });
 
   return (
     <section ref={ref} className="py-20 px-6 bg-white">
@@ -362,57 +461,50 @@ function TopProvidersSection() {
           className="text-center mb-12"
         >
           <h2 className="font-display font-extrabold text-4xl text-yo-green-dark mb-4">
-            Nos meilleurs voisins
+            Prestataires populaires
           </h2>
-          <p className="text-yo-gray-500 text-lg">Des professionnels vérifiés et notés par la communauté</p>
+          <p className="text-yo-gray-500 text-lg">Vérifiés et notés par la communauté</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {providers.map((provider, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={inView ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <Card className="text-center hover:shadow-yo-xl transition-all hover:-translate-y-2 cursor-pointer">
-                <div className="flex justify-center mb-4">
-                  <Avatar 
-                    firstName={provider.name.split(' ')[0]} 
-                    lastName={provider.name.split(' ')[1]} 
-                    size="lg" 
-                    verified={provider.verified}
-                  />
-                </div>
-                <h3 className="font-bold text-lg mb-1">{provider.name}</h3>
-                <p className="text-yo-gray-500 text-sm mb-3">{provider.service}</p>
-                <div className="flex items-center justify-center gap-1 mb-3">
-                  <Star className="w-4 h-4 fill-yo-orange text-yo-orange" />
-                  <span className="font-bold text-yo-green-dark">{provider.rating}</span>
-                  <span className="text-yo-gray-400 text-sm">({provider.missions} missions)</span>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <MapPin className="w-4 h-4 text-yo-gray-400" />
-                  <span className="text-sm text-yo-gray-500">{provider.commune}</span>
-                </div>
-                <Badge variant="status" className="mt-3">{provider.badge}</Badge>
-              </Card>
+              <ProviderCard {...provider} />
             </motion.div>
           ))}
         </div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.6 }}
-          className="text-center mt-12"
-        >
-          <Button size="lg" variant="outline">
-            Voir tous les prestataires
-          </Button>
-        </motion.div>
       </div>
     </section>
+  );
+}
+
+function ProviderCard({ name, initial, service, rating, missions, hourly, verified }: any) {
+  return (
+    <Card className="hover:-translate-y-2 transition-all cursor-pointer">
+      <div className="flex items-start gap-4 mb-4">
+        <Avatar firstName={name} lastName="K." size="lg" verified={verified} />
+        <div className="flex-1">
+          <h3 className="font-bold text-lg">{name} K.</h3>
+          <p className="text-yo-gray-500 text-sm">{service}</p>
+          <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-1 text-yo-orange text-sm">
+              <Star className="w-4 h-4 fill-current" />
+              <span className="font-bold">{rating}</span>
+            </div>
+            <span className="text-yo-gray-400 text-sm">• {missions} missions</span>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center justify-between pt-4 border-t border-yo-gray-200">
+        <span className="font-bold text-yo-orange">{hourly.toLocaleString()} FCFA/h</span>
+        <Badge variant="verified">Disponible</Badge>
+      </div>
+    </Card>
   );
 }
 
@@ -422,46 +514,28 @@ function WhyYoVoisinSection() {
 
   const features = [
     {
-      icon: Shield,
-      title: 'Sécurité garantie',
-      desc: 'Vérification CNI + selfie obligatoire pour tous les prestataires',
-      color: 'text-yo-green',
-      bgColor: 'bg-yo-green-pale',
-    },
-    {
-      icon: Lock,
-      title: 'Paiement sécurisé',
-      desc: 'Système escrow : ton argent est protégé jusqu\'à la fin du service',
+      icon: <Shield className="w-12 h-12" />,
+      title: 'Paiement 100% sécurisé',
+      desc: 'Ton argent est en escrow jusqu\'à validation. Protection totale contre les arnaques.',
       color: 'text-yo-orange',
-      bgColor: 'bg-yo-orange-pale',
     },
     {
-      icon: Users,
-      title: '100% ivoirien',
-      desc: 'Créé à Abidjan, pour les Abidjanais, par des Ivoiriens',
+      icon: <CheckCircle className="w-12 h-12" />,
+      title: 'Profils vérifiés CNI + Selfie',
+      desc: 'Chaque utilisateur est vérifié avec sa CNI et un selfie. Zéro faux profil.',
       color: 'text-yo-green',
-      bgColor: 'bg-yo-green-pale',
     },
     {
-      icon: Award,
-      title: 'Système de niveaux',
-      desc: 'Bronze, Argent, Or, Platine : seuls les meilleurs montent',
+      icon: <Star className="w-12 h-12" />,
+      title: 'Avis 100% authentiques',
+      desc: 'Seuls les vrais clients peuvent noter. Notation bidirectionnelle.',
       color: 'text-yo-orange',
-      bgColor: 'bg-yo-orange-pale',
     },
     {
-      icon: MessageCircle,
-      title: 'Messagerie sécurisée',
-      desc: 'Chat intégré avec filtrage anti-désintermédiation',
+      icon: <Clock className="w-12 h-12" />,
+      title: 'Réponse rapide',
+      desc: 'Reçois des devis en moins de 2 heures. Les prestataires sont réactifs.',
       color: 'text-yo-green',
-      bgColor: 'bg-yo-green-pale',
-    },
-    {
-      icon: Clock,
-      title: 'Support réactif',
-      desc: 'Notre équipe répond en moins de 2h en semaine',
-      color: 'text-yo-orange',
-      bgColor: 'bg-yo-orange-pale',
     },
   ];
 
@@ -474,81 +548,26 @@ function WhyYoVoisinSection() {
           className="text-center mb-16"
         >
           <h2 className="font-display font-extrabold text-4xl text-yo-green-dark mb-4">
-            Pourquoi choisir Yo! Voiz ?
+            Pourquoi Yo! Voiz ?
           </h2>
-          <p className="text-yo-gray-500 text-lg">La plateforme la plus sûre d'Abidjan</p>
+          <p className="text-yo-gray-500 text-lg">La confiance avant tout</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {features.map((feature, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="bg-white rounded-yo-lg shadow-yo-sm p-6 hover:shadow-yo-md transition-all"
+              initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
+              animate={inView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              className="bg-white rounded-yo-lg shadow-yo-md p-8 hover:shadow-yo-xl transition-shadow"
             >
-              <div className={`w-14 h-14 ${feature.bgColor} rounded-full flex items-center justify-center mb-4`}>
-                <feature.icon className={`w-7 h-7 ${feature.color}`} />
-              </div>
-              <h3 className="font-bold text-xl mb-2">{feature.title}</h3>
-              <p className="text-yo-gray-500">{feature.desc}</p>
+              <div className={`${feature.color} mb-4`}>{feature.icon}</div>
+              <h3 className="font-bold text-xl mb-3">{feature.title}</h3>
+              <p className="text-yo-gray-600 leading-relaxed">{feature.desc}</p>
             </motion.div>
           ))}
         </div>
-      </div>
-    </section>
-  );
-}
-
-// ========== PROMO SECTION ==========
-function PromoSection() {
-  const [ref, inView] = useInView({ triggerOnce: true });
-
-  return (
-    <section ref={ref} className="py-20 px-6 bg-gradient-to-r from-yo-green to-yo-green-light text-white relative overflow-hidden">
-      <motion.div 
-        className="absolute top-0 right-0 w-96 h-96 bg-yo-orange/20 rounded-full blur-3xl"
-        animate={{ scale: [1, 1.3, 1], rotate: [0, 90, 0] }}
-        transition={{ duration: 10, repeat: Infinity }}
-      />
-      
-      <div className="max-w-4xl mx-auto text-center relative z-10">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={inView ? { opacity: 1, scale: 1 } : {}}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="inline-flex items-center gap-2 bg-yo-orange px-6 py-2 rounded-full mb-6">
-            <Gift className="w-5 h-5" />
-            <span className="font-bold">OFFRE DE LANCEMENT</span>
-          </div>
-          <h2 className="font-display font-black text-5xl md:text-6xl mb-6">
-            -20% sur ton 1er service ! 🎉
-          </h2>
-          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Inscris-toi maintenant et reçois un code promo de <strong>-20%</strong> à utiliser sur ton premier service. Offre limitée aux 500 premiers inscrits !
-          </p>
-          <div className="bg-white/10 backdrop-blur-md rounded-yo-lg p-6 inline-block mb-8">
-            <p className="text-sm text-white/80 mb-2">Code promo :</p>
-            <div className="flex items-center gap-3">
-              <div className="bg-white text-yo-green-dark px-8 py-3 rounded-lg font-mono font-black text-2xl tracking-wider">
-                YOVOISIN20
-              </div>
-              <Button variant="secondary" size="sm">
-                Copier
-              </Button>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-yo-green hover:bg-white/90">
-              M'inscrire maintenant
-            </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-              En savoir plus
-            </Button>
-          </div>
-        </motion.div>
       </div>
     </section>
   );
@@ -567,123 +586,108 @@ function CategoriesSection() {
           className="text-center mb-12"
         >
           <h2 className="font-display font-extrabold text-4xl text-yo-green-dark mb-4">
-            Services populaires
+            14 catégories de services
           </h2>
-          <p className="text-yo-gray-500 text-lg">Plus de 15 catégories disponibles</p>
+          <p className="text-yo-gray-500 text-lg">Des voisins qualifiés dans tous les domaines</p>
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {CATEGORIES.slice(0, 10).map((category, index) => (
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-6">
+          {CATEGORIES.map((category, index) => (
             <motion.div
               key={category.id}
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.8 }}
               animate={inView ? { opacity: 1, scale: 1 } : {}}
-              transition={{ duration: 0.4, delay: index * 0.05 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
             >
-              <Card className="text-center hover:shadow-yo-lg transition-all hover:-translate-y-1 cursor-pointer h-full">
-                <div className="text-4xl mb-3">{category.emoji}</div>
-                <h3 className="font-bold text-sm mb-1">{category.name}</h3>
-                <p className="text-xs text-yo-gray-400">{category.description}</p>
-              </Card>
+              <CategoryCard category={category} />
             </motion.div>
           ))}
         </div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.6 }}
-          className="text-center mt-10"
-        >
-          <Button variant="outline" size="lg">
-            Voir toutes les catégories
-          </Button>
-        </motion.div>
       </div>
     </section>
   );
 }
 
-// ========== MOBILE APP SECTION ==========
-function MobileAppSection() {
+function CategoryCard({ category }: { category: any }) {
+  return (
+    <div className="flex flex-col items-center gap-3 cursor-pointer hover:scale-110 transition-transform">
+      <div
+        className="w-16 h-16 rounded-yo-md flex items-center justify-center text-3xl shadow-yo-sm hover:shadow-yo-md transition-shadow"
+        style={{ backgroundColor: category.color }}
+      >
+        {category.emoji}
+      </div>
+      <span className="text-xs font-semibold text-yo-gray-600 text-center leading-tight">
+        {category.label}
+      </span>
+    </div>
+  );
+}
+
+// ========== COMPETITIVE ADVANTAGES SECTION ==========
+function CompetitiveAdvantagesSection() {
   const [ref, inView] = useInView({ triggerOnce: true });
 
-  return (
-    <section ref={ref} className="py-20 px-6 bg-gradient-to-br from-yo-gray-50 to-white">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="inline-flex items-center gap-2 bg-yo-green-pale px-4 py-2 rounded-full mb-6">
-              <Smartphone className="w-4 h-4 text-yo-green" />
-              <span className="text-yo-green font-semibold text-sm">Bientôt disponible</span>
-            </div>
-            <h2 className="font-display font-extrabold text-4xl text-yo-green-dark mb-6">
-              L'app mobile arrive ! 📱
-            </h2>
-            <p className="text-yo-gray-600 text-lg mb-8 leading-relaxed">
-              Télécharge l'application <strong>Yo! Voiz</strong> et accède à tous tes services en un clic. Notifications en temps réel, chat intégré, paiement Mobile Money ultra-rapide.
-            </p>
-            <ul className="space-y-4 mb-8">
-              {[
-                'Notifications push pour chaque nouveau devis',
-                'Chat en temps réel avec tes voisins',
-                'Paiement Mobile Money en 1 clic',
-                'Suivi GPS du prestataire en direct',
-              ].map((feature, index) => (
-                <motion.li
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={inView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ delay: 0.3 + index * 0.1 }}
-                  className="flex items-start gap-3"
-                >
-                  <CheckCircle className="w-6 h-6 text-yo-green flex-shrink-0 mt-0.5" />
-                  <span className="text-yo-gray-700">{feature}</span>
-                </motion.li>
-              ))}
-            </ul>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="bg-black text-white hover:bg-black/80">
-                <svg className="w-6 h-6 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-                </svg>
-                App Store
-              </Button>
-              <Button size="lg" className="bg-yo-green text-white hover:bg-yo-green-dark">
-                <svg className="w-6 h-6 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
-                </svg>
-                Google Play
-              </Button>
-            </div>
-          </motion.div>
+  const advantages = [
+    {
+      icon: <Zap className="w-8 h-8" />,
+      title: 'Réactivité garantie',
+      description: 'Temps de réponse moyen : 1h30',
+      stats: '95% de réponses en moins de 2h',
+    },
+    {
+      icon: <Target className="w-8 h-8" />,
+      title: 'Matching intelligent',
+      description: 'Algorithme de proximité GPS',
+      stats: 'Prestataires dans un rayon de 5km',
+    },
+    {
+      icon: <HeartHandshake className="w-8 h-8" />,
+      title: 'Communauté locale',
+      description: '100% voisins ivoiriens vérifiés',
+      stats: 'Confiance et solidarité',
+    },
+    {
+      icon: <Sparkles className="w-8 h-8" />,
+      title: 'Qualité certifiée',
+      description: 'Système de badges et niveaux',
+      stats: 'Bronze → Argent → Or → Platine',
+    },
+  ];
 
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={inView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative"
-          >
-            <div className="bg-gradient-to-br from-yo-green to-yo-green-light rounded-yo-xl p-12 text-center shadow-yo-xl">
-              <div className="text-8xl mb-4">📱</div>
-              <p className="text-white text-2xl font-bold mb-2">Bientôt sur iOS & Android</p>
-              <p className="text-white/80">Inscris-toi pour être notifié du lancement</p>
-              <div className="mt-6 flex gap-2">
-                <input
-                  type="email"
-                  placeholder="ton-email@exemple.com"
-                  className="flex-1 px-4 py-3 rounded-lg outline-none"
-                />
-                <Button variant="secondary">
-                  Notifie-moi
-                </Button>
+  return (
+    <section ref={ref} className="py-20 px-6 bg-gradient-to-br from-yo-green-dark to-yo-green">
+      <div className="max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          className="text-center mb-12"
+        >
+          <h2 className="font-display font-extrabold text-4xl text-white mb-4">
+            Ce qui nous rend uniques
+          </h2>
+          <p className="text-white/80 text-lg">
+            La première plateforme pensée pour les Ivoiriens
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {advantages.map((advantage, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: index * 0.1 }}
+              className="bg-white/10 backdrop-blur-md rounded-yo-lg p-6 border border-white/20 hover:bg-white/20 transition-all"
+            >
+              <div className="text-yo-orange mb-4">{advantage.icon}</div>
+              <h3 className="font-bold text-lg text-white mb-2">{advantage.title}</h3>
+              <p className="text-white/80 text-sm mb-3">{advantage.description}</p>
+              <div className="text-xs text-yo-orange font-semibold pt-3 border-t border-white/20">
+                {advantage.stats}
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>
@@ -692,44 +696,49 @@ function MobileAppSection() {
 
 // ========== TESTIMONIALS ==========
 function TestimonialsSection() {
-  const [ref, inView] = useInView({ triggerOnce: true });
-
   const testimonials = [
     {
-      name: 'Mariam S.',
-      role: 'Cliente',
-      commune: 'Cocody',
+      name: 'Awa',
+      role: 'Cliente à Cocody',
+      avatar: 'A',
       rating: 5,
-      text: "J'ai trouvé une femme de ménage en 30 minutes ! Le système de paiement Mobile Money c'est trop facile. Je recommande à 100% 🔥",
+      text: 'C\'est gnaman ! J\'ai trouvé une femme de ménage super pro en 1 heure. Le paiement Mobile Money c\'est trop pratique.',
     },
     {
-      name: 'Youssouf K.',
-      role: 'Prestataire Plombier',
-      commune: 'Marcory',
+      name: 'Ibrahim',
+      role: 'Client à Marcory',
+      avatar: 'I',
       rating: 5,
-      text: "Depuis que je suis sur Yo! Voiz, je reçois 3-4 demandes par jour. Le paiement est sécurisé, les clients sont sérieux. Top !",
+      text: 'Mon robinet fuyait depuis 3 jours. En 2h chrono, un plombier était chez moi. Service rapide et sécurisé !',
     },
     {
-      name: 'Adjoua F.',
-      role: 'Cliente',
-      commune: 'Plateau',
+      name: 'Kouassi',
+      role: 'Prestataire à Yopougon',
+      avatar: 'K',
       rating: 5,
-      text: "Super plateforme ! J'ai fait réparer ma télé, repeindre mon salon et trouver un livreur. Tout est passé par Yo! Voiz 👍",
+      text: 'Je gagne bien ma vie grâce à Yo! Voiz. Les paiements sont toujours à l\'heure. Je recommande à 100%.',
     },
   ];
 
+  const [ref, inView] = useInView({ triggerOnce: true });
+
   return (
-    <section ref={ref} className="py-20 px-6 bg-white">
+    <section ref={ref} className="py-20 px-6 bg-yo-green-dark">
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           className="text-center mb-12"
         >
-          <h2 className="font-display font-extrabold text-4xl text-yo-green-dark mb-4">
+          <h2 className="font-display font-extrabold text-4xl text-white mb-4">
             Ils nous font confiance
           </h2>
-          <p className="text-yo-gray-500 text-lg">Des milliers d'Abidjanais satisfaits</p>
+          <div className="flex items-center justify-center gap-2 text-yo-orange text-2xl">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="w-8 h-8 fill-current" />
+            ))}
+            <span className="text-white ml-2">4.8/5 • 847 avis</span>
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -739,173 +748,26 @@ function TestimonialsSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: index * 0.1 }}
+              className="bg-white rounded-yo-lg p-6"
             >
-              <Card className="h-full hover:shadow-yo-lg transition-shadow">
-                <div className="flex items-center gap-3 mb-4">
-                  <Avatar 
-                    firstName={testimonial.name.split(' ')[0]} 
-                    lastName={testimonial.name.split(' ')[1]} 
-                    size="md" 
-                  />
-                  <div>
-                    <h4 className="font-bold">{testimonial.name}</h4>
-                    <p className="text-sm text-yo-gray-500">{testimonial.role}</p>
-                  </div>
+              <div className="flex items-center gap-3 mb-4">
+                <Avatar firstName={testimonial.avatar} lastName="." size="md" />
+                <div>
+                  <h4 className="font-bold">{testimonial.name}</h4>
+                  <p className="text-yo-gray-500 text-sm">{testimonial.role}</p>
                 </div>
-                <div className="flex gap-1 mb-4">
-                  {Array.from({ length: testimonial.rating }).map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-yo-orange text-yo-orange" />
-                  ))}
-                </div>
-                <p className="text-yo-gray-600 mb-4 leading-relaxed">{testimonial.text}</p>
-                <div className="flex items-center gap-2 text-sm text-yo-gray-400">
-                  <MapPin className="w-4 h-4" />
-                  <span>{testimonial.commune}</span>
-                </div>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ========== COMMUNES MAP SECTION ==========
-function CommunesMapSection() {
-  const [ref, inView] = useInView({ triggerOnce: true });
-
-  const communesData = [
-    { name: 'Abobo', count: 276, color: 'bg-yo-green-dark' },
-    { name: 'Adjamé', count: 198, color: 'bg-yo-green-light' },
-    { name: 'Anyama', count: 87, color: 'bg-yo-orange' },
-    { name: 'Attécoubé', count: 132, color: 'bg-yo-green' },
-    { name: 'Bingerville', count: 94, color: 'bg-yo-orange-light' },
-    { name: 'Brofodoumé', count: 45, color: 'bg-yo-green-light' },
-    { name: 'Cocody', count: 234, color: 'bg-yo-green' },
-    { name: 'Koumassi', count: 145, color: 'bg-yo-green' },
-    { name: 'Marcory', count: 189, color: 'bg-yo-green-light' },
-    { name: 'Plateau', count: 156, color: 'bg-yo-orange' },
-    { name: 'Port-Bouët', count: 178, color: 'bg-yo-orange-dark' },
-    { name: 'Songon', count: 56, color: 'bg-yo-green-dark' },
-    { name: 'Treichville', count: 167, color: 'bg-yo-orange-light' },
-    { name: 'Yopougon', count: 298, color: 'bg-yo-orange-dark' },
-  ];
-
-  return (
-    <section ref={ref} className="py-20 px-6 bg-yo-gray-50">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          className="text-center mb-12"
-        >
-          <h2 className="font-display font-extrabold text-4xl text-yo-green-dark mb-4">
-            Partout à Abidjan 📍
-          </h2>
-          <p className="text-yo-gray-500 text-lg">Des prestataires vérifiés dans les 14 communes d'Abidjan</p>
-        </motion.div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          {communesData.map((commune, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={inView ? { opacity: 1, scale: 1 } : {}}
-              transition={{ duration: 0.4, delay: index * 0.05 }}
-              className="bg-white rounded-yo-lg shadow-yo-sm p-6 text-center hover:shadow-yo-md transition-all hover:-translate-y-1 cursor-pointer"
-            >
-              <div className={`w-12 h-12 ${commune.color} rounded-full mx-auto mb-3 flex items-center justify-center`}>
-                <MapPin className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-bold text-lg mb-1">{commune.name}</h3>
-              <p className="text-yo-gray-500 text-sm">{commune.count} prestataires</p>
+              <div className="flex gap-1 text-yo-orange mb-3">
+                {[...Array(testimonial.rating)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-current" />
+                ))}
+              </div>
+              <p className="text-yo-gray-600 text-sm leading-relaxed italic">
+                "{testimonial.text}"
+              </p>
             </motion.div>
           ))}
         </div>
-      </div>
-    </section>
-  );
-}
-
-// ========== BLOG PREVIEW ==========
-function BlogPreviewSection() {
-  const [ref, inView] = useInView({ triggerOnce: true });
-
-  const articles = [
-    {
-      title: '5 conseils pour choisir le bon prestataire',
-      category: 'Guide',
-      date: '12 Fév 2024',
-      readTime: '5 min',
-      emoji: '💡',
-    },
-    {
-      title: 'Comment devenir un super voisin sur Yo! Voiz',
-      category: 'Conseils',
-      date: '10 Fév 2024',
-      readTime: '4 min',
-      emoji: '⭐',
-    },
-    {
-      title: 'Les services les plus demandés à Abidjan',
-      category: 'Tendances',
-      date: '08 Fév 2024',
-      readTime: '3 min',
-      emoji: '📊',
-    },
-  ];
-
-  return (
-    <section ref={ref} className="py-20 px-6 bg-white">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center gap-2 bg-yo-green-pale px-4 py-2 rounded-full mb-6">
-            <BookOpen className="w-4 h-4 text-yo-green" />
-            <span className="text-yo-green font-semibold text-sm">Blog</span>
-          </div>
-          <h2 className="font-display font-extrabold text-4xl text-yo-green-dark mb-4">
-            Conseils & Actualités
-          </h2>
-          <p className="text-yo-gray-500 text-lg">Tout pour réussir sur Yo! Voiz</p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {articles.map((article, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-            >
-              <Card className="h-full hover:shadow-yo-lg transition-all hover:-translate-y-1 cursor-pointer">
-                <div className="text-5xl mb-4">{article.emoji}</div>
-                <Badge variant="status" className="mb-3">{article.category}</Badge>
-                <h3 className="font-bold text-lg mb-3 leading-tight">{article.title}</h3>
-                <div className="flex items-center gap-4 text-sm text-yo-gray-400">
-                  <span>{article.date}</span>
-                  <span>•</span>
-                  <span>{article.readTime}</span>
-                </div>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.5 }}
-          className="text-center mt-10"
-        >
-          <Button variant="outline" size="lg">
-            Voir tous les articles
-          </Button>
-        </motion.div>
       </div>
     </section>
   );
@@ -913,39 +775,31 @@ function BlogPreviewSection() {
 
 // ========== FAQ ==========
 function FAQSection() {
-  const [ref, inView] = useInView({ triggerOnce: true });
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
-
   const faqs = [
     {
-      q: "Comment fonctionne Yo! Voiz ?",
-      a: "C'est simple : tu publies ta demande, des prestataires vérifiés te répondent avec des devis, tu choisis le meilleur, tu paies en Mobile Money de manière sécurisée, et tu notes le prestataire après le service.",
+      q: 'Comment fonctionne le paiement sécurisé ?',
+      a: 'Ton argent est bloqué en escrow jusqu\'à ce que tu valides le service. Si problème, tu es remboursé à 100%.',
     },
     {
-      q: "Est-ce que c'est gratuit ?",
-      a: "Oui, l'inscription et la publication de demandes sont 100% gratuites. Nous prenons une petite commission (10%) sur chaque transaction pour maintenir la plateforme et assurer la sécurité.",
+      q: 'Comment vérifiez-vous les prestataires ?',
+      a: 'Chaque prestataire doit fournir sa CNI + un selfie. Notre équipe vérifie manuellement sous 24-48h.',
     },
     {
-      q: "Comment sont vérifiés les prestataires ?",
-      a: "Tous les prestataires doivent fournir une pièce d'identité (CNI) valide et un selfie pour vérification. Nous vérifions manuellement chaque inscription avant validation.",
+      q: 'Quels moyens de paiement acceptez-vous ?',
+      a: 'Orange Money, MTN MoMo, Wave et Moov Money. Tous les paiements Mobile Money ivoiriens.',
     },
     {
-      q: "Comment fonctionne le paiement Mobile Money ?",
-      a: "Tu paies via Orange Money, MTN MoMo ou Wave. L'argent est bloqué dans un système escrow et n'est libéré au prestataire qu'après confirmation du service réalisé.",
-    },
-    {
-      q: "Que faire en cas de problème ?",
-      a: "Tu peux ouvrir un litige depuis ton espace. Notre équipe arbitre et peut bloquer le paiement ou rembourser selon la situation. Le support répond sous 2h en semaine.",
-    },
-    {
-      q: "Comment devenir prestataire ?",
-      a: "Clique sur 'Devenir prestataire', inscris-toi avec ta CNI + selfie, attends la validation (24-48h), et commence à recevoir des demandes dans ta zone !",
+      q: 'Y a-t-il des frais cachés ?',
+      a: 'Aucun frais pour les demandeurs. Les prestataires paient une commission de 10-15% selon leur niveau.',
     },
   ];
 
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [ref, inView] = useInView({ triggerOnce: true });
+
   return (
     <section ref={ref} className="py-20 px-6 bg-yo-gray-50">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -954,7 +808,6 @@ function FAQSection() {
           <h2 className="font-display font-extrabold text-4xl text-yo-green-dark mb-4">
             Questions fréquentes
           </h2>
-          <p className="text-yo-gray-500 text-lg">Tout ce que tu dois savoir</p>
         </motion.div>
 
         <div className="space-y-4">
@@ -963,47 +816,94 @@ function FAQSection() {
               key={index}
               initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.4, delay: index * 0.05 }}
+              transition={{ delay: index * 0.1 }}
             >
-              <Card 
-                className="cursor-pointer hover:shadow-yo-md transition-shadow"
+              <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                className="w-full bg-white rounded-yo-lg p-6 text-left hover:shadow-yo-md transition-all"
               >
-                <div className="flex items-start justify-between gap-4">
-                  <h3 className="font-bold text-lg flex-1">{faq.q}</h3>
-                  <motion.div
-                    animate={{ rotate: openIndex === index ? 180 : 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <ChevronDown className="w-5 h-5 text-yo-gray-400 flex-shrink-0" />
-                  </motion.div>
+                <div className="flex justify-between items-center">
+                  <h3 className="font-bold text-lg pr-4">{faq.q}</h3>
+                  <ChevronDown
+                    className={`w-6 h-6 text-yo-green transition-transform ${
+                      openIndex === index ? 'rotate-180' : ''
+                    }`}
+                  />
                 </div>
-                <motion.div
-                  initial={false}
-                  animate={{
-                    height: openIndex === index ? 'auto' : 0,
-                    opacity: openIndex === index ? 1 : 0,
-                  }}
-                  transition={{ duration: 0.3 }}
-                  className="overflow-hidden"
-                >
-                  <p className="text-yo-gray-600 mt-3 leading-relaxed">{faq.a}</p>
-                </motion.div>
-              </Card>
+                {openIndex === index && (
+                  <p className="mt-4 text-yo-gray-600 leading-relaxed">{faq.a}</p>
+                )}
+              </button>
             </motion.div>
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+// ========== PARTNERS SECTION ==========
+function PartnersSection() {
+  const [ref, inView] = useInView({ triggerOnce: true });
+
+  return (
+    <section ref={ref} className="py-16 px-6 bg-white border-t border-yo-gray-200">
+      <div className="max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          className="text-center mb-12"
+        >
+          <h2 className="font-display font-extrabold text-3xl text-yo-green-dark mb-4">
+            Nos partenaires de confiance
+          </h2>
+          <p className="text-yo-gray-500">Solutions de paiement sécurisées et certifications</p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.2 }}
+          className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center"
+        >
+          {[
+            { name: 'Orange Money', logo: '🟠' },
+            { name: 'MTN MoMo', logo: '🟡' },
+            { name: 'Wave', logo: '💙' },
+            { name: 'Moov Money', logo: '🔵' },
+            { name: 'CinetPay', logo: '💳' },
+          ].map((partner, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={inView ? { opacity: 1, scale: 1 } : {}}
+              transition={{ delay: index * 0.1 }}
+              className="flex flex-col items-center justify-center p-6 bg-yo-gray-50 rounded-yo-lg hover:bg-yo-gray-100 transition-colors"
+            >
+              <div className="text-4xl mb-2">{partner.logo}</div>
+              <span className="text-sm font-semibold text-yo-gray-600">{partner.name}</span>
+            </motion.div>
+          ))}
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0 }}
           animate={inView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.5 }}
-          className="mt-10 text-center"
+          transition={{ delay: 0.6 }}
+          className="flex flex-wrap justify-center gap-4 mt-12 pt-8 border-t border-yo-gray-200"
         >
-          <p className="text-yo-gray-500 mb-4">Tu as d'autres questions ?</p>
-          <Button variant="outline" size="lg">
-            Contacte-nous
-          </Button>
+          <Badge variant="verified" className="text-base px-4 py-2">
+            🛡️ Données sécurisées SSL
+          </Badge>
+          <Badge variant="default" className="text-base px-4 py-2">
+            ✅ Conforme RGPD
+          </Badge>
+          <Badge variant="default" className="text-base px-4 py-2">
+            🇨🇮 Entreprise ivoirienne
+          </Badge>
+          <Badge variant="default" className="text-base px-4 py-2">
+            ⚡ Support 7j/7
+          </Badge>
         </motion.div>
       </div>
     </section>
@@ -1015,43 +915,44 @@ function FinalCTASection() {
   const [ref, inView] = useInView({ triggerOnce: true });
 
   return (
-    <section ref={ref} className="py-20 px-6 bg-gradient-to-br from-yo-green-dark via-yo-green to-yo-orange text-white relative overflow-hidden">
-      <motion.div 
+    <section ref={ref} className="py-24 px-6 bg-gradient-to-br from-yo-orange via-yo-orange-dark to-yo-orange-light text-white relative overflow-hidden">
+      <motion.div
         className="absolute inset-0 opacity-10"
+        animate={{
+          backgroundPosition: ['0% 0%', '100% 100%'],
+        }}
+        transition={{ duration: 20, repeat: Infinity, repeatType: 'reverse' }}
         style={{
-          backgroundImage: 'radial-gradient(circle, white 2px, transparent 2px)',
+          backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
           backgroundSize: '50px 50px',
         }}
       />
       
-      <div className="max-w-4xl mx-auto text-center relative z-10">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={inView ? { opacity: 1, scale: 1 } : {}}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="text-6xl mb-6">🚀</div>
-          <h2 className="font-display font-black text-5xl md:text-6xl mb-6">
-            Rejoins la communauté !
-          </h2>
-          <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
-            Plus de <strong>2500 Abidjanais</strong> utilisent déjà Yo! Voiz chaque jour. Pourquoi pas toi ?
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Button size="lg" className="bg-white text-yo-green hover:bg-white/90">
-              <Users className="w-5 h-5" />
-              M'inscrire gratuitement
-            </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-              <Wrench className="w-5 h-5" />
-              Devenir prestataire
-            </Button>
-          </div>
-          <p className="text-white/70 text-sm">
-            ✅ Inscription gratuite • ✅ Paiement sécurisé • ✅ Support 7j/7
-          </p>
-        </motion.div>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        className="max-w-4xl mx-auto text-center relative z-10"
+      >
+        <h2 className="font-display font-black text-5xl mb-6">
+          Prêt à trouver ton voisin ?
+        </h2>
+        <p className="text-xl mb-8 text-white/90">
+          Rejoins les <strong>847 utilisateurs</strong> qui font déjà confiance à Yo! Voiz
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button size="lg" className="bg-white text-yo-orange hover:bg-white/90 text-lg">
+            <Users className="w-5 h-5" />
+            S'inscrire gratuitement
+          </Button>
+          <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/10">
+            <MessageCircle className="w-5 h-5" />
+            Nous contacter
+          </Button>
+        </div>
+        <p className="mt-6 text-white/70 text-sm">
+          ✓ Inscription gratuite • ✓ Sans engagement • ✓ Support 7j/7
+        </p>
+      </motion.div>
     </section>
   );
 }
@@ -1062,28 +963,13 @@ function Footer() {
     <footer className="bg-yo-green-dark text-white py-12 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          {/* Brand */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <svg viewBox="0 0 120 140" width="36" height="42" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="60" cy="78" r="56" fill="#2D2D2A"/>
-                <circle cx="60" cy="78" r="52" fill="#F37021"/>
-                <ellipse cx="42" cy="56" rx="28" ry="22" fill="#FF8C42" opacity="0.4"/>
-                <ellipse cx="42" cy="60" rx="6" ry="8" fill="#2D2D2A"/>
-                <ellipse cx="78" cy="60" rx="6" ry="8" fill="#2D2D2A"/>
-                <path d="M28,78 Q60,123 92,78" fill="#2D2D2A"/>
-                <path d="M32,80 Q60,118 88,80" fill="#DC2626"/>
-                <rect x="32" y="78" width="56" height="8" rx="2" fill="white"/>
-                <path d="M10,42 C8,14 28,-4 60,-6 C92,-4 112,14 110,42 Z" fill="#FCD34D"/>
-                <path d="M32,8 C48,-4 72,-4 88,8 C72,0 48,0 32,8 Z" fill="#FDE68A" opacity="0.7"/>
-                <line x1="60" y1="-4" x2="60" y2="40" stroke="#D97706" strokeWidth="3" opacity="0.2"/>
-                <path d="M6,42 L2,50 C10,58 30,62 60,62 C90,62 110,58 118,50 L114,42 Z" fill="#D97706"/>
-                <rect x="16" y="32" width="88" height="8" rx="4" fill="#F37021"/>
-                <rect x="16" y="32" width="88" height="4" rx="2" fill="#FF8C42" opacity="0.5"/>
-              </svg>
-              <span className="font-display font-black text-2xl">Yo! Voiz</span>
+            <div className="font-display font-black text-3xl mb-4">
+              <span className="text-yo-orange">Yo!</span> Voisin
             </div>
-            <p className="text-white/70 text-sm mb-4">
-              La plateforme #1 de services entre voisins à Abidjan 🇨🇮
+            <p className="text-white/70 mb-4">
+              Services entre voisins à Abidjan
             </p>
             <div className="flex gap-3">
               <a href="#" className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition">
@@ -1093,52 +979,64 @@ function Footer() {
                 <Instagram className="w-5 h-5" />
               </a>
               <a href="#" className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition">
-                <Phone className="w-5 h-5" />
+                <Twitter className="w-5 h-5" />
               </a>
             </div>
           </div>
 
+          {/* Liens */}
           <div>
-            <h4 className="font-bold mb-4">Plateforme</h4>
-            <ul className="space-y-2 text-sm text-white/70">
+            <h3 className="font-bold mb-4">Plateforme</h3>
+            <ul className="space-y-2 text-white/70">
               <li><a href="#" className="hover:text-white transition">Comment ça marche</a></li>
               <li><a href="#" className="hover:text-white transition">Devenir prestataire</a></li>
               <li><a href="#" className="hover:text-white transition">Catégories</a></li>
               <li><a href="#" className="hover:text-white transition">Tarifs</a></li>
+              <li><a href="#" className="hover:text-white transition">Blog</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-bold mb-4">Support</h4>
-            <ul className="space-y-2 text-sm text-white/70">
-              <li><a href="#" className="hover:text-white transition">FAQ</a></li>
-              <li><a href="#" className="hover:text-white transition">Centre d'aide</a></li>
-              <li><a href="#" className="hover:text-white transition">Nous contacter</a></li>
-              <li><a href="#" className="hover:text-white transition">Signaler un problème</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-bold mb-4">Légal</h4>
-            <ul className="space-y-2 text-sm text-white/70">
+            <h3 className="font-bold mb-4">Légal & Sécurité</h3>
+            <ul className="space-y-2 text-white/70">
               <li><a href="#" className="hover:text-white transition">CGU</a></li>
-              <li><a href="#" className="hover:text-white transition">CGV</a></li>
               <li><a href="#" className="hover:text-white transition">Politique de confidentialité</a></li>
               <li><a href="#" className="hover:text-white transition">Mentions légales</a></li>
+              <li><a href="#" className="hover:text-white transition">Charte de confiance</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-bold mb-4">Contact</h3>
+            <ul className="space-y-3 text-white/70">
+              <li className="flex items-center gap-2">
+                <Phone className="w-4 h-4" />
+                <a href="tel:+2250707000000" className="hover:text-white transition">+225 07 07 00 00 00</a>
+              </li>
+              <li className="flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                <a href="mailto:contact@yovoisin.ci" className="hover:text-white transition">contact@yovoisin.ci</a>
+              </li>
+              <li className="flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
+                <span>Abidjan, Côte d'Ivoire</span>
+              </li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-white/10 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-white/70 text-sm">
-              © 2026 Yo! Voiz. Tous droits réservés. Fabriqué avec ❤️ à Abidjan.
-            </p>
-            <div className="flex items-center gap-4 text-sm text-white/70">
-              <span>🇨🇮 100% Ivoirien</span>
-              <span>•</span>
-              <span>📱 Support 7j/7</span>
-            </div>
+        {/* Bottom */}
+        <div className="border-t border-white/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-white/70 text-sm text-center md:text-left">
+            © 2026 Yo! Voiz — Fait avec ❤️ à Abidjan, Côte d'Ivoire 🇨🇮
+            <br className="md:hidden" />
+            <span className="hidden md:inline"> • </span>
+            <span className="text-xs">Plateforme 100% ivoirienne de services entre voisins</span>
+          </p>
+          <div className="flex gap-6 text-white/70 text-sm">
+            <a href="#" className="hover:text-white transition">Presse</a>
+            <a href="#" className="hover:text-white transition">Carrières</a>
+            <a href="#" className="hover:text-white transition">Partenaires</a>
           </div>
         </div>
       </div>
