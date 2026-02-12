@@ -1,0 +1,7 @@
+{
+  "buildCommand": "cd yo-voisin && npm run build",
+  "devCommand": "cd yo-voisin && npm run dev",
+  "installCommand": "cd yo-voisin && npm install",
+  "framework": "nextjs",
+  "outputDirectory": "yo-voisin/.next"
+}
