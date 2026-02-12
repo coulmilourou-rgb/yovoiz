@@ -134,3 +134,65 @@ export async function checkDuplicateContact(
 export function generateOTPCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
+
+/**
+ * Vérifie un code OTP
+ * @param phone Numéro de téléphone (+225XXXXXXXXXX)
+ * @param code Code à 6 chiffres
+ */
+export async function verifyOTP(
+  phone: string,
+  code: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const response = await fetch('/api/otp/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, code }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return { success: false, message: data.error || 'Erreur de vérification' };
+    }
+
+    return { success: true, message: 'Code vérifié avec succès' };
+  } catch (error) {
+    console.error('Error verifying OTP:', error);
+    return { success: false, message: 'Une erreur est survenue' };
+  }
+}
+
+/**
+ * Renvoie un code OTP
+ * @param userId ID de l'utilisateur (non utilisé actuellement, mais requis par l'interface)
+ * @param phone Numéro de téléphone (+225XXXXXXXXXX)
+ */
+export async function resendOTP(
+  userId: string,
+  phone: string
+): Promise<{ success: boolean; message: string; code?: string }> {
+  try {
+    const response = await fetch('/api/otp/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return { success: false, message: data.error || "Erreur d'envoi" };
+    }
+
+    return {
+      success: true,
+      message: 'Code envoyé avec succès',
+      code: data.code,
+    };
+  } catch (error) {
+    console.error('Error resending OTP:', error);
+    return { success: false, message: 'Une erreur est survenue' };
+  }
+}

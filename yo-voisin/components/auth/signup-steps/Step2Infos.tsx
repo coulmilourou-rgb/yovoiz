@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AlertCircle, Eye, EyeOff, CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input-v2';
+import { Input } from '@/components/ui/Input';
 import { SignupData } from '@/app/auth/inscription/page';
 import { checkDuplicateContact } from '@/lib/otp';
 

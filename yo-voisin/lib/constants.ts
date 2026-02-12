@@ -2,28 +2,28 @@
 
 export interface Category {
   id: string;
-  name: string;
+  label: string;
   emoji: string;
   color: string;
   description: string;
 }
 
 export const CATEGORIES: Category[] = [
-  { id: 'menage', name: 'Ménage', emoji: '🧹', color: '#E8F5ED', description: 'Nettoyage & entretien' },
-  { id: 'gouvernante', name: 'Gouvernante', emoji: '👩‍🍳', color: '#FEF3C7', description: 'Aide à domicile' },
-  { id: 'bricolage', name: 'Bricolage', emoji: '🔧', color: '#FFF0E5', description: 'Petits travaux' },
-  { id: 'livraison', name: 'Livraison', emoji: '🚚', color: '#E0F2FE', description: 'Courses & colis' },
-  { id: 'reparation', name: 'Réparations', emoji: '⚡', color: '#F3E8FF', description: 'Électricité & plomberie' },
-  { id: 'manutention', name: 'Manutention', emoji: '📦', color: '#ECFDF5', description: 'Déménagement' },
-  { id: 'jardinage', name: 'Jardinage', emoji: '🌿', color: '#ECFDF5', description: 'Entretien jardin' },
-  { id: 'couture', name: 'Couture', emoji: '🧵', color: '#FFF0E5', description: 'Retouches & création' },
-  { id: 'cours', name: 'Cours particuliers', emoji: '📚', color: '#E0F2FE', description: 'Soutien scolaire' },
-  { id: 'cuisine', name: 'Cuisine', emoji: '🍳', color: '#FEF3C7', description: 'Traiteur & chef' },
-  { id: 'evenementiel', name: 'Événementiel', emoji: '🎉', color: '#F3E8FF', description: 'Animation & déco' },
-  { id: 'informatique', name: 'Informatique', emoji: '💻', color: '#E0F2FE', description: 'Dépannage PC' },
-  { id: 'beaute', name: 'Beauté', emoji: '💇‍♀️', color: '#FCE7F3', description: 'Coiffure & soins' },
-  { id: 'auto', name: 'Auto & Moto', emoji: '🚗', color: '#FFF0E5', description: 'Mécanique & lavage' },
-  { id: 'garde', name: 'Garde enfants', emoji: '👶', color: '#FECACA', description: 'Baby-sitting' },
+  { id: 'menage', label: 'Ménage', emoji: '🧹', color: '#E8F5ED', description: 'Nettoyage & entretien' },
+  { id: 'gouvernante', label: 'Gouvernante', emoji: '👩‍🍳', color: '#FEF3C7', description: 'Aide à domicile' },
+  { id: 'bricolage', label: 'Bricolage', emoji: '🔧', color: '#FFF0E5', description: 'Petits travaux' },
+  { id: 'livraison', label: 'Livraison', emoji: '🚚', color: '#E0F2FE', description: 'Courses & colis' },
+  { id: 'reparation', label: 'Réparations', emoji: '⚡', color: '#F3E8FF', description: 'Électricité & plomberie' },
+  { id: 'manutention', label: 'Manutention', emoji: '📦', color: '#ECFDF5', description: 'Déménagement' },
+  { id: 'jardinage', label: 'Jardinage', emoji: '🌿', color: '#ECFDF5', description: 'Entretien jardin' },
+  { id: 'couture', label: 'Couture', emoji: '🧵', color: '#FFF0E5', description: 'Retouches & création' },
+  { id: 'cours', label: 'Cours particuliers', emoji: '📚', color: '#E0F2FE', description: 'Soutien scolaire' },
+  { id: 'cuisine', label: 'Cuisine', emoji: '🍳', color: '#FEF3C7', description: 'Traiteur & chef' },
+  { id: 'evenementiel', label: 'Événementiel', emoji: '🎉', color: '#F3E8FF', description: 'Animation & déco' },
+  { id: 'informatique', label: 'Informatique', emoji: '💻', color: '#E0F2FE', description: 'Dépannage PC' },
+  { id: 'beaute', label: 'Beauté', emoji: '💇‍♀️', color: '#FCE7F3', description: 'Coiffure & soins' },
+  { id: 'auto', label: 'Auto & Moto', emoji: '🚗', color: '#FFF0E5', description: 'Mécanique & lavage' },
+  { id: 'garde', label: 'Garde enfants', emoji: '👶', color: '#FECACA', description: 'Baby-sitting' },
 ];
 
 export const COMMUNES: string[] = [

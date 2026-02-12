@@ -3,6 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://yo-voiz.vercel.app'),
   title: "Yo! Voiz — Services entre voisins à Abidjan | Ménage, Bricolage, Livraison",
   description: "Trouvez un voisin de confiance pour le ménage, le bricolage, la livraison et plus à Abidjan. Paiement Mobile Money sécurisé. Profils vérifiés. Plus de 200 prestataires disponibles.",
   keywords: "services, Abidjan, Côte d'Ivoire, ménage, bricolage, livraison, prestataire, voisin, mobile money, Orange Money, MTN, Wave",
