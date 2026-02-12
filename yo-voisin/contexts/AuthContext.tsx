@@ -113,12 +113,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string, userData: Partial<Profile>) => {
     try {
-      // ✅ VERSION CORRIGÉE : Utilise le trigger PostgreSQL
-      // Le profil est créé automatiquement par le trigger `on_auth_user_created`
+      // ✅ Configuration de l'URL de redirection pour l'email de confirmation
+      const siteUrl = typeof window !== 'undefined' 
+        ? window.location.origin 
+        : 'https://yovoiz.vercel.app';
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: `${siteUrl}/auth/confirm-email`,
           data: {
             user_type: userData.user_type || 'client',
             full_name: userData.full_name || '',
@@ -131,13 +135,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       });
 
-      if (error) return { error };
+      if (error) {
+        console.error('❌ Erreur signUp Supabase:', error);
+        return { error };
+      }
 
-      // ✅ Le trigger PostgreSQL crée automatiquement le profil
-      // Aucune insertion manuelle nécessaire
+      console.log('✅ Inscription réussie - Email de confirmation envoyé à:', email);
+      console.log('📧 Vérifiez votre boîte de réception (et spam)');
       
       return { error: null };
     } catch (error) {
+      console.error('❌ Exception signUp:', error);
       return { error: error as AuthError };
     }
   };
