@@ -113,44 +113,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string, userData: Partial<Profile>) => {
     try {
+      // Inscription avec métadonnées utilisateur
+      // Le trigger PostgreSQL créera automatiquement le profil
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            first_name: userData.first_name,
-            last_name: userData.last_name,
-            phone: userData.phone,
+            user_type: userData.user_type || 'client',
+            full_name: userData.full_name || '',
+            phone: userData.phone || '',
+            commune: userData.commune || '',
+            quartier: userData.quartier || '',
+            phone_verified: true,
+            profile_completed: true,
           },
         },
       });
 
       if (error) return { error };
 
-      if (data.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([
-            {
-              id: data.user.id,
-              user_type: userData.role || 'client',
-              full_name: `${userData.first_name} ${userData.last_name}`,
-              phone: userData.phone,
-              commune: userData.commune,
-              quartier: userData.quartier,
-              verification_status: 'pending',
-              email_verified: false,
-              phone_verified: true,
-              profile_completed: true,
-            },
-          ]);
-
-        if (profileError) {
-          console.error('Erreur création profil:', profileError);
-          return { error: profileError as any };
-        }
-      }
-
+      // Le profil est créé automatiquement par le trigger PostgreSQL
+      // Plus besoin d'insertion manuelle !
+      
       return { error: null };
     } catch (error) {
       return { error: error as AuthError };
