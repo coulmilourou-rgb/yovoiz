@@ -113,8 +113,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string, userData: Partial<Profile>) => {
     try {
-      // Inscription avec métadonnées utilisateur
-      // Le trigger PostgreSQL créera automatiquement le profil
+      // ✅ VERSION CORRIGÉE : Utilise le trigger PostgreSQL
+      // Le profil est créé automatiquement par le trigger `on_auth_user_created`
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -133,8 +133,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) return { error };
 
-      // Le profil est créé automatiquement par le trigger PostgreSQL
-      // Plus besoin d'insertion manuelle !
+      // ✅ Le trigger PostgreSQL crée automatiquement le profil
+      // Aucune insertion manuelle nécessaire
       
       return { error: null };
     } catch (error) {
