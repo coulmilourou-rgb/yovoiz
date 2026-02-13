@@ -172,11 +172,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (event === 'SIGNED_IN' && currentSession?.user) {
-          console.log('✅ Event: SIGNED_IN - Redirection immédiate vers /home');
+          // Récupérer le rôle depuis les métadonnées utilisateur (bypass fetchProfile)
+          const userMetadata = currentSession.user.user_metadata || {};
+          const userRole = userMetadata.role || userMetadata.user_type || 'demandeur';
           
-          // Redirection immédiate sans attendre le profil
-          // La page /home attendra que le profil se charge et redirigera vers le bon dashboard
-          router.push('/home');
+          const targetRoute = (userRole === 'prestataire' || userRole === 'provider')
+            ? '/dashboard/prestataire' 
+            : '/dashboard/client';
+          
+          console.log('✅ SIGNED_IN - Rôle metadata:', userRole, '→ Redirection:', targetRoute);
+          router.push(targetRoute);
         }
         
         if (event === 'SIGNED_OUT') {
