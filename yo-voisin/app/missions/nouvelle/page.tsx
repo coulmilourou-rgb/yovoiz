@@ -105,12 +105,15 @@ export default function NouvelleMission() {
           budget_max: parseInt(formData.budget_max),
           urgency: formData.urgency,
           preferred_date: formData.preferred_date,
-          status: 'open',
+          status: 'published',
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erreur Supabase:', error);
+        throw error;
+      }
 
       // TODO: Upload des images si présentes
       
