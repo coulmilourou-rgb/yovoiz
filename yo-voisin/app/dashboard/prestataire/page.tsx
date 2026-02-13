@@ -169,7 +169,11 @@ export default function ProviderDashboard() {
   if (loading || loadingData) {
     return (
       <div className="min-h-screen bg-yo-gray-50">
-        <Navbar isConnected={true} />
+        <Navbar isConnected={!!user} user={profile ? {
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          avatar_url: profile.avatar_url
+        } : undefined} />
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="mb-8">
             <Skeleton width="45%" height={40} className="mb-2" />
@@ -201,7 +205,14 @@ export default function ProviderDashboard() {
 
   return (
     <div className="min-h-screen bg-yo-gray-50">
-      <Navbar isConnected={true} />
+      <Navbar 
+        isConnected={true} 
+        user={{
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          avatar_url: profile.avatar_url
+        }}
+      />
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
