@@ -172,25 +172,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (event === 'SIGNED_IN' && currentSession?.user) {
-          console.log('✅ Event: SIGNED_IN - Chargement du profil puis redirection');
+          console.log('✅ Event: SIGNED_IN - Redirection immédiate vers /home');
           
-          // Attendre que le profil se charge
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', currentSession.user.id)
-            .single();
-          
-          if (profileData) {
-            const targetRoute = profileData.role === 'prestataire' 
-              ? '/dashboard/prestataire' 
-              : '/dashboard/client';
-            console.log('➡️ Redirection vers:', targetRoute);
-            router.push(targetRoute);
-          } else {
-            // Fallback si pas de profil
-            router.push('/dashboard/client');
-          }
+          // Redirection immédiate sans attendre le profil
+          // La page /home attendra que le profil se charge et redirigera vers le bon dashboard
+          router.push('/home');
         }
         
         if (event === 'SIGNED_OUT') {
