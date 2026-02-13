@@ -52,18 +52,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchProfile = async (userId: string) => {
     try {
       console.log('🔍 Chargement du profil pour:', userId);
+      console.log('📡 Début de la requête Supabase...');
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
+      console.log('📦 Réponse Supabase reçue');
+      console.log('📊 Data:', data);
+      console.log('❌ Error:', error);
+
       if (error) {
-        console.error('❌ Erreur chargement profil:', error);
+        console.error('❌ Erreur chargement profil - Code:', error.code);
+        console.error('❌ Erreur chargement profil - Message:', error.message);
+        console.error('❌ Erreur chargement profil - Details:', error.details);
+        console.error('❌ Erreur chargement profil - Hint:', error.hint);
+        
         // Si le profil n'existe pas, créer un profil minimal
         if (error.code === 'PGRST116') {
           console.log('⚠️ Profil introuvable, création d\'un profil par défaut...');
-          const { data: newProfile } = await supabase
+          const { data: newProfile, error: insertError } = await supabase
             .from('profiles')
             .insert({
               id: userId,
@@ -77,16 +87,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .select()
             .single();
           
+          console.log('📦 Résultat création profil:', newProfile);
+          console.log('❌ Erreur création:', insertError);
+          
           if (newProfile) {
             console.log('✅ Profil créé:', newProfile);
             setProfile(newProfile);
             return;
           }
         }
-        throw error;
+        
+        console.error('❌ fetchProfile échoue, setProfile(null)');
+        setProfile(null);
+        return;
       }
 
-      console.log('✅ Profil chargé:', data);
+      if (!data) {
+        console.error('⚠️ Pas de data retournée mais pas d\'erreur non plus !');
+        setProfile(null);
+        return;
+      }
+
+      console.log('✅ Profil chargé avec succès:', data);
       setProfile(data);
     } catch (error) {
       console.error('❌ Exception lors du chargement du profil:', error);
