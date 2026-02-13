@@ -28,8 +28,8 @@ BEGIN
     COALESCE(NEW.raw_user_meta_data->>'first_name', 'Utilisateur'),
     COALESCE(NEW.raw_user_meta_data->>'last_name', 'Nouveau'),
     COALESCE(NEW.raw_user_meta_data->>'phone', '0000000000'),
-    'both'::user_type,  -- ✅ Tous = both
-    'both',             -- ✅ Tous = both
+    'both'::user_type,
+    'both',
     COALESCE(NEW.raw_user_meta_data->>'commune', 'Non spécifiée'),
     NEW.raw_user_meta_data->>'quartier'
   )
