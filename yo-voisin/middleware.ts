@@ -52,8 +52,8 @@ export async function middleware(request: NextRequest) {
 
   // Si l'utilisateur a un cookie auth et essaie d'accéder à une page d'auth
   if (hasAuthCookie && isAuthRoute) {
-    console.log('🔄 Cookie détecté - Redirection vers /dashboard/client');
-    return NextResponse.redirect(new URL('/dashboard/client', request.url));
+    console.log('🔄 Cookie détecté - Redirection vers /home');
+    return NextResponse.redirect(new URL('/home', request.url));
   }
 
   // Si l'utilisateur n'a PAS de cookie et essaie d'accéder à une route protégée

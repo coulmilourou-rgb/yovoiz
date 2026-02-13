@@ -51,10 +51,7 @@ export default function InscriptionPage() {
   // Rediriger si déjà connecté
   useEffect(() => {
     if (user && profile) {
-      const targetRoute = profile.role === 'prestataire' 
-        ? '/dashboard/prestataire' 
-        : '/dashboard/client';
-      router.push(targetRoute);
+      router.push('/home');
     }
   }, [user, profile, router]);
 
