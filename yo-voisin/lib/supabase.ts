@@ -14,8 +14,13 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
-    // Utiliser le storage par défaut (pas de storageKey custom)
     flowType: 'pkce',
+    // Augmenter le timeout des locks pour éviter AbortError
+    lock: {
+      type: 'tab',
+      retryInterval: 100,
+      acquireTimeout: 10000 // 10 secondes au lieu de 2
+    }
   },
   global: {
     headers: {
