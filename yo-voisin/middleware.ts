@@ -2,12 +2,6 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  // TEMPORAIRE : Désactiver le middleware pour le développement local
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🔧 Mode DEV - Middleware désactivé');
-    return NextResponse.next();
-  }
-
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -101,8 +95,8 @@ export async function middleware(request: NextRequest) {
 
   // Si l'utilisateur est connecté et essaie d'accéder à une page d'auth
   if (session && isAuthRoute) {
-    console.log('🔄 Utilisateur connecté redirigé de auth vers /home');
-    return NextResponse.redirect(new URL('/home', request.url));
+    console.log('🔄 Utilisateur connecté redirigé de auth vers /dashboard/client');
+    return NextResponse.redirect(new URL('/dashboard/client', request.url));
   }
 
   // Si l'utilisateur n'est pas connecté et essaie d'accéder à une route protégée
