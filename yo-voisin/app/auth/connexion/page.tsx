@@ -41,10 +41,13 @@ export default function ConnexionPage() {
         return;
       }
 
-      console.log('✅ Connexion réussie, redirection vers /test-dashboard...');
+      console.log('✅ Connexion réussie, redirection vers /home...');
       
-      // Redirection vers page de test
-      window.location.href = '/test-dashboard';
+      // Attendre un peu que le contexte se mette à jour
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Redirection vers home (qui redirigera vers le dashboard approprié)
+      router.push('/home');
       
     } catch (err) {
       console.error('❌ Exception connexion:', err);

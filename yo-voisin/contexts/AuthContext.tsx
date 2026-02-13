@@ -7,19 +7,30 @@ import { useRouter } from 'next/navigation';
 
 interface Profile {
   id: string;
-  user_type?: 'client' | 'provider' | 'both';
-  full_name?: string;
-  phone?: string;
-  commune?: string;
-  quartier?: string;
-  address_details?: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  phone_verified?: boolean;
   avatar_url?: string;
   bio?: string;
+  user_type: 'client' | 'provider' | 'both';
+  role: 'demandeur' | 'prestataire' | 'both';
+  is_active?: boolean;
+  is_banned?: boolean;
   verification_status?: 'pending' | 'submitted' | 'verified' | 'rejected';
-  email_verified?: boolean;
-  phone_verified?: boolean;
-  profile_completed?: boolean;
+  verified_at?: string;
+  commune: string;
+  quartier?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  total_missions_completed?: number;
+  average_rating?: number;
+  total_reviews?: number;
+  is_premium?: boolean;
+  premium_until?: string;
   created_at?: string;
+  updated_at?: string;
 }
 
 interface AuthContextType {
