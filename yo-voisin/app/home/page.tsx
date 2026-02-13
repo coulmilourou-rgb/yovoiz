@@ -295,18 +295,18 @@ export default function HomePage() {
 
           {/* Panneau Quick Post à droite */}
           <div className="lg:sticky lg:top-24 h-fit space-y-6">
-            {/* Quick Post */}
-            <Card className="p-6">
+            {/* Quick Post - Demande */}
+            <Card className="p-6 border-2 border-yo-orange">
               <h3 className="font-display font-bold text-xl text-yo-gray-900 mb-4 flex items-center gap-2">
                 <Plus className="w-5 h-5 text-yo-orange" />
-                Publier une demande
+                Poster une demande
               </h3>
               
               <textarea
                 value={quickPostText}
                 onChange={(e) => setQuickPostText(e.target.value)}
                 placeholder="De quoi avez-vous besoin aujourd'hui ?"
-                className="w-full px-4 py-3 bg-yo-gray-50 rounded-lg border border-yo-gray-200 focus:outline-none focus:ring-2 focus:ring-yo-green resize-none"
+                className="w-full px-4 py-3 bg-yo-gray-50 rounded-lg border border-yo-gray-200 focus:outline-none focus:ring-2 focus:ring-yo-orange resize-none"
                 rows={4}
               />
 
@@ -314,10 +314,10 @@ export default function HomePage() {
                 <Button
                   onClick={handleQuickPost}
                   disabled={!quickPostText.trim()}
-                  className="w-full"
+                  className="w-full bg-yo-orange hover:bg-yo-orange-dark"
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  Continuer
+                  Continuer ma demande
                 </Button>
                 
                 <Button
@@ -332,6 +332,40 @@ export default function HomePage() {
 
               <p className="text-xs text-yo-gray-500 mt-4 text-center">
                 💡 Décrivez rapidement votre besoin, vous pourrez ajouter plus de détails ensuite
+              </p>
+            </Card>
+
+            {/* Quick Post - Offre de service */}
+            <Card className="p-6 border-2 border-yo-green">
+              <h3 className="font-display font-bold text-xl text-yo-gray-900 mb-4 flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-yo-green" />
+                Proposer mes services
+              </h3>
+              
+              <p className="text-yo-gray-600 mb-4 text-sm">
+                Vous avez une compétence à partager ? Créez votre profil de prestataire et recevez des demandes.
+              </p>
+
+              <div className="space-y-3">
+                <Button
+                  onClick={() => router.push('/services/nouvelle-offre')}
+                  className="w-full bg-yo-green hover:bg-yo-green-dark"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Créer mon offre de service
+                </Button>
+                
+                <Button
+                  variant="secondary"
+                  onClick={() => router.push('/services/mes-offres')}
+                  className="w-full"
+                >
+                  Voir mes offres actives
+                </Button>
+              </div>
+
+              <p className="text-xs text-yo-gray-500 mt-4 text-center">
+                ✨ Définissez vos compétences, tarifs et zones d'intervention
               </p>
             </Card>
 
