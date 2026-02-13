@@ -6,10 +6,11 @@ export async function middleware(request: NextRequest) {
   // ⚠️ SIMPLIFIÉ: Vérification UNIQUEMENT basée sur les cookies
   // Ne pas appeler supabase.auth.getSession() - cause AbortError
   
-  // Détecter TOUS les cookies Supabase auth (peu importe le nom exact)
+  // Détecter notre cookie personnalisé sb-auth-token
   const allCookies = request.cookies.getAll();
   const hasAuthCookie = allCookies.some(cookie => 
-    cookie.name.startsWith('sb-') && cookie.name.includes('auth-token')
+    cookie.name === 'sb-auth-token' || 
+    (cookie.name.startsWith('sb-') && cookie.name.includes('auth-token'))
   );
   
   console.log('🍪 Cookies détectés:', allCookies.map(c => c.name).join(', '));
