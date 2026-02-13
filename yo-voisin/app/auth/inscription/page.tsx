@@ -19,15 +19,13 @@ import Step4Verification from '@/components/auth/signup-steps/Step4Verification'
 import Step5Bienvenue from '@/components/auth/signup-steps/Step5Bienvenue';
 
 const STEPS = [
-  { number: 1, title: 'Rôle', description: 'Qui êtes-vous ?' },
-  { number: 2, title: 'Infos', description: 'Vos coordonnées' },
-  { number: 3, title: 'Localisation', description: 'Où habitez-vous ?' },
-  { number: 4, title: 'Vérification', description: 'CNI + Selfie' },
-  { number: 5, title: 'Bienvenue', description: 'C\'est terminé !' },
+  { number: 1, title: 'Infos', description: 'Vos coordonnées' },
+  { number: 2, title: 'Localisation', description: 'Où habitez-vous ?' },
+  { number: 3, title: 'Vérification', description: 'CNI + Selfie' },
+  { number: 4, title: 'Bienvenue', description: 'C\'est terminé !' },
 ];
 
 export interface SignupData {
-  role: 'demandeur' | 'prestataire' | 'both' | '';
   first_name: string;
   last_name: string;
   email: string;
@@ -56,7 +54,6 @@ export default function InscriptionPage() {
   }, [user, profile, router]);
 
   const [formData, setFormData] = useState<SignupData>({
-    role: '',
     first_name: '',
     last_name: '',
     email: '',
@@ -71,7 +68,7 @@ export default function InscriptionPage() {
   };
 
   const goToNextStep = () => {
-    if (currentStep < 5) {
+    if (currentStep < 4) {
       setCurrentStep(prev => prev + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -93,8 +90,6 @@ export default function InscriptionPage() {
       
       console.log('📝 Données inscription:', {
         email: formData.email,
-        role: formData.role,
-        user_type: formData.role,
         first_name: formData.first_name,
         last_name: formData.last_name,
         full_name: fullName,
@@ -104,11 +99,14 @@ export default function InscriptionPage() {
       });
 
       const signUpData = {
-        user_type: formData.role as 'client' | 'provider' | 'both',
+        user_type: 'both' as 'client' | 'provider' | 'both',  // Tous les users peuvent demander ET offrir
         full_name: fullName,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
         phone: formData.phone,
         commune: formData.commune,
         quartier: formData.quartier,
+        role: 'both',  // Rôle unique
       };
       
       console.log('🚀 Envoi à signUp:', signUpData);
@@ -160,15 +158,13 @@ export default function InscriptionPage() {
 
     switch (currentStep) {
       case 1:
-        return <Step1Role {...props} />;
-      case 2:
         return <Step2Infos {...props} />;
-      case 3:
+      case 2:
         return <Step3Localisation {...props} />;
-      case 4:
+      case 3:
         return <Step4Verification {...props} onSubmit={handleSubmit} loading={loading} />;
-      case 5:
-        return <Step5Bienvenue role={formData.role} name={formData.first_name} />;
+      case 4:
+        return <Step5Bienvenue role="both" name={formData.first_name} />;
       default:
         return null;
     }
