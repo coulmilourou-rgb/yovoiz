@@ -43,11 +43,11 @@ export default function ConnexionPage() {
 
       console.log('✅ Connexion réussie, redirection vers /home...');
       
-      // Attendre un peu que le contexte se mette à jour
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Attendre que le contexte se mette à jour
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Redirection vers home (qui redirigera vers le dashboard approprié)
-      router.push('/home');
+      // Forcer une redirection complète avec rechargement
+      window.location.href = '/home';
       
     } catch (err) {
       console.error('❌ Exception connexion:', err);

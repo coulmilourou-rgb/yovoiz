@@ -79,7 +79,9 @@ export async function middleware(request: NextRequest) {
   // Routes protégées nécessitant une authentification
   const protectedRoutes = [
     '/home',
+    '/dashboard',
     '/profile',
+    '/missions',
     '/demandes',
     '/messages',
     '/notifications',
@@ -103,25 +105,6 @@ export async function middleware(request: NextRequest) {
     const redirectUrl = new URL('/auth/connexion', request.url);
     redirectUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(redirectUrl);
-  }
-
-  // Si l'utilisateur est connecté, vérifier son statut de vérification
-  if (session && isProtectedRoute) {
-    // Récupérer le profil utilisateur
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('verification_status')
-      .eq('user_id', session.user.id)
-      .single();
-
-    // Si le profil n'est pas vérifié, rediriger vers la page de vérification
-    if (profile && profile.verification_status !== 'approved') {
-      // Exception : autoriser l'accès à la page de vérification du profil
-      if (pathname !== '/profile/verification') {
-        console.log('⚠️ Profil non vérifié - Redirection vers /profile/verification');
-        return NextResponse.redirect(new URL('/profile/verification', request.url));
-      }
-    }
   }
 
   return response;
