@@ -2,422 +2,293 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { 
-  Briefcase, 
-  Clock, 
-  Star, 
-  Heart,
-  TrendingUp,
-  MapPin,
-  Plus,
-  Bell,
-  LogOut,
-  ChevronRight
-} from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/contexts/AuthContext';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { Navbar } from '@/components/layout/Navbar';
 import { Card } from '@/components/ui/Card';
-import { Avatar } from '@/components/ui/Avatar';
+import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-
-interface Profile {
-  id: string;
-  full_name: string | null;
-  phone: string | null;
-  commune: string | null;
-  quartier: string | null;
-  verification_status: string | null;
-}
+import { 
+  Plus, 
+  Clock, 
+  CheckCircle, 
+  XCircle, 
+  TrendingUp,
+  Eye,
+  MessageCircle,
+  Calendar,
+  DollarSign
+} from 'lucide-react';
 
 interface Mission {
   id: string;
   title: string;
   description: string;
   category: string;
-  budget_min: number;
-  budget_max: number;
-  status: string;
+  budget: number;
+  status: 'published' | 'in_progress' | 'completed' | 'cancelled';
   created_at: string;
-  offers_count?: number;
+  candidates_count?: number;
+  selected_provider?: {
+    first_name: string;
+    last_name: string;
+    avatar_url?: string;
+  };
+}
+
+interface Stats {
+  active_missions: number;
+  completed_missions: number;
+  total_spent: number;
+  pending_reviews: number;
 }
 
 export default function ClientDashboard() {
   const router = useRouter();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const { user, profile, loading } = useAuth();
+  const supabase = createClientComponentClient();
+  
   const [missions, setMissions] = useState<Mission[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'active' | 'completed' | 'favorites'>('active');
+  const [stats, setStats] = useState<Stats>({
+    active_missions: 0,
+    completed_missions: 0,
+    total_spent: 0,
+    pending_reviews: 0
+  });
+  const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
-    checkAuthAndLoadData();
-  }, []);
+    if (!loading && !user) {
+      router.push('/auth/connexion');
+    }
+  }, [user, loading, router]);
 
-  const checkAuthAndLoadData = async () => {
+  useEffect(() => {
+    if (user && profile) {
+      fetchDashboardData();
+    }
+  }, [user, profile]);
+
+  const fetchDashboardData = async () => {
     try {
-      // Vérifier l'authentification
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      
-      if (authError || !user) {
-        console.log('Non authentifié, redirection...');
-        router.push('/auth/connexion');
-        return;
-      }
+      // Fetch missions
+      const { data: missionsData, error: missionsError } = await supabase
+        .from('missions')
+        .select(`
+          *,
+          candidates:mission_candidates(count),
+          selected_provider:profiles!missions_provider_id_fkey(first_name, last_name, avatar_url)
+        `)
+        .eq('client_id', user?.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
 
-      // Charger le profil
-      try {
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
+      if (missionsError) throw missionsError;
 
-        if (profileError) {
-          console.error('Erreur profil:', profileError);
-        } else {
-          setProfile(profileData);
-        }
-      } catch (err) {
-        console.error('Erreur chargement profil:', err);
-      }
+      setMissions(missionsData || []);
 
-      // Charger les missions
-      try {
-        const { data: missionsData, error: missionsError } = await supabase
-          .from('missions')
-          .select('*')
-          .eq('client_id', user.id)
-          .order('created_at', { ascending: false });
+      // Calculate stats
+      const activeMissions = missionsData?.filter(m => 
+        m.status === 'published' || m.status === 'in_progress'
+      ).length || 0;
 
-        if (missionsError) {
-          console.error('Erreur missions:', missionsError);
-        } else if (missionsData) {
-          setMissions(missionsData.map(m => ({ ...m, offers_count: 0 })));
-        }
-      } catch (err) {
-        console.error('Erreur chargement missions:', err);
-      }
+      const completedMissions = missionsData?.filter(m => 
+        m.status === 'completed'
+      ).length || 0;
+
+      const totalSpent = missionsData
+        ?.filter(m => m.status === 'completed')
+        .reduce((sum, m) => sum + (m.budget || 0), 0) || 0;
+
+      setStats({
+        active_missions: activeMissions,
+        completed_missions: completedMissions,
+        total_spent: totalSpent,
+        pending_reviews: 0 // TODO: Fetch from reviews table
+      });
 
     } catch (error) {
-      console.error('Erreur générale:', error);
+      console.error('Erreur chargement dashboard:', error);
     } finally {
-      setLoading(false);
+      setLoadingData(false);
     }
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/');
+  const getStatusBadge = (status: Mission['status']) => {
+    const statusConfig = {
+      published: { label: 'Publiée', variant: 'success' as const, icon: Clock },
+      in_progress: { label: 'En cours', variant: 'warning' as const, icon: TrendingUp },
+      completed: { label: 'Terminée', variant: 'default' as const, icon: CheckCircle },
+      cancelled: { label: 'Annulée', variant: 'destructive' as const, icon: XCircle }
+    };
+
+    const config = statusConfig[status];
+    const Icon = config.icon;
+
+    return (
+      <Badge variant={config.variant} className="flex items-center gap-1">
+        <Icon className="w-3 h-3" />
+        {config.label}
+      </Badge>
+    );
   };
 
-  if (loading) {
+  if (loading || loadingData) {
     return (
-      <div className="min-h-screen bg-yo-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-yo-orange border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-yo-gray-500">Chargement...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yo-green"></div>
       </div>
     );
   }
 
-  const activeMissions = missions.filter(m => ['open', 'in_progress'].includes(m.status));
-  const completedMissions = missions.filter(m => m.status === 'completed');
+  if (!user || !profile) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-yo-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-yo-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <button onClick={() => router.push('/')} className="flex items-center gap-2">
-              <div className="text-2xl">👷</div>
-              <span className="font-display font-black text-xl">
-                <span className="text-yo-orange">Yo!</span>{' '}
-                <span className="text-yo-green-dark">Voiz</span>
-              </span>
-            </button>
+      <Navbar isConnected={true} />
 
-            {/* Navigation */}
-            <nav className="hidden md:flex items-center gap-6">
-              <button 
-                onClick={() => router.push('/missions/nouvelle')}
-                className="flex items-center gap-2 text-yo-gray-700 hover:text-yo-orange transition"
-              >
-                <Plus className="w-5 h-5" />
-                <span>Nouvelle mission</span>
-              </button>
-              <button className="relative">
-                <Bell className="w-5 h-5 text-yo-gray-700 hover:text-yo-orange transition" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-yo-orange rounded-full text-white text-xs flex items-center justify-center">
-                  0
-                </span>
-              </button>
-            </nav>
-
-            {/* Profil */}
-            <div className="flex items-center gap-3">
-              <Avatar 
-                name={profile?.full_name || 'User'}
-                size="md"
-              />
-              <div className="hidden md:block">
-                <p className="font-semibold text-sm text-yo-gray-900">{profile?.full_name || 'Utilisateur'}</p>
-                <p className="text-xs text-yo-gray-500">{profile?.commune || 'Abidjan'}</p>
-              </div>
-              <button onClick={handleLogout} className="ml-2 text-yo-gray-400 hover:text-yo-orange transition">
-                <LogOut className="w-5 h-5" />
-              </button>
-            </div>
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="font-display font-extrabold text-4xl text-yo-green-dark mb-2">
+              Mon Dashboard Client
+            </h1>
+            <p className="text-yo-gray-600 text-lg">
+              Gérez vos demandes et suivez vos missions
+            </p>
           </div>
+          <Button 
+            onClick={() => router.push('/missions/nouvelle')}
+            className="flex items-center gap-2"
+          >
+            <Plus className="w-5 h-5" />
+            Nouvelle demande
+          </Button>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="p-6 hover:shadow-yo-lg transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-yo-gray-500 mb-1">Missions actives</p>
-                <p className="text-3xl font-bold text-yo-gray-900">{activeMissions.length}</p>
-              </div>
-              <div className="w-12 h-12 bg-yo-orange/10 rounded-full flex items-center justify-center">
-                <Briefcase className="w-6 h-6 text-yo-orange" />
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-yo-gray-600">Missions actives</span>
+              <Clock className="w-5 h-5 text-yo-orange" />
             </div>
+            <p className="font-display font-extrabold text-3xl text-yo-green-dark">
+              {stats.active_missions}
+            </p>
           </Card>
 
-          <Card className="p-6 hover:shadow-yo-lg transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-yo-gray-500 mb-1">Terminées</p>
-                <p className="text-3xl font-bold text-yo-gray-900">{completedMissions.length}</p>
-              </div>
-              <div className="w-12 h-12 bg-yo-green/10 rounded-full flex items-center justify-center">
-                <Clock className="w-6 h-6 text-yo-green" />
-              </div>
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-yo-gray-600">Missions complétées</span>
+              <CheckCircle className="w-5 h-5 text-green-600" />
             </div>
+            <p className="font-display font-extrabold text-3xl text-yo-green-dark">
+              {stats.completed_missions}
+            </p>
           </Card>
 
-          <Card className="p-6 hover:shadow-yo-lg transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-yo-gray-500 mb-1">Prestataires favoris</p>
-                <p className="text-3xl font-bold text-yo-gray-900">0</p>
-              </div>
-              <div className="w-12 h-12 bg-yo-yellow/10 rounded-full flex items-center justify-center">
-                <Heart className="w-6 h-6 text-yo-yellow-dark" />
-              </div>
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-yo-gray-600">Dépenses totales</span>
+              <DollarSign className="w-5 h-5 text-blue-600" />
             </div>
+            <p className="font-display font-extrabold text-3xl text-yo-green-dark">
+              {stats.total_spent.toLocaleString()} CFA
+            </p>
           </Card>
 
-          <Card className="p-6 hover:shadow-yo-lg transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-yo-gray-500 mb-1">Dépenses totales</p>
-                <p className="text-2xl font-bold text-yo-gray-900">0 F</p>
-              </div>
-              <div className="w-12 h-12 bg-yo-green-dark/10 rounded-full flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-yo-green-dark" />
-              </div>
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-yo-gray-600">Avis à laisser</span>
+              <TrendingUp className="w-5 h-5 text-purple-600" />
             </div>
+            <p className="font-display font-extrabold text-3xl text-yo-green-dark">
+              {stats.pending_reviews}
+            </p>
           </Card>
         </div>
 
-        {/* CTA Nouvelle Mission */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <Card className="p-6 bg-gradient-to-r from-yo-orange to-yo-orange-light">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="text-white">
-                <h3 className="font-display font-bold text-xl mb-2">Besoin d&apos;un service ?</h3>
-                <p className="text-white/90">
-                  Publie ta mission et reçois des propositions de prestataires qualifiés en quelques minutes
-                </p>
-              </div>
-              <Button 
-                size="lg"
-                onClick={() => router.push('/missions/nouvelle')}
-                className="bg-white text-yo-orange hover:bg-yo-gray-50 shadow-yo-lg whitespace-nowrap"
-              >
-                <Plus className="w-5 h-5" />
-                Créer une mission
-              </Button>
-            </div>
-          </Card>
-        </motion.div>
+        {/* Missions actives */}
+        <Card className="p-6 mb-8">
+          <h2 className="font-display font-bold text-2xl text-yo-green-dark mb-6">
+            Mes missions
+          </h2>
 
-        {/* Tabs */}
-        <div className="flex items-center gap-4 mb-6 border-b border-yo-gray-200">
-          <button
-            onClick={() => setActiveTab('active')}
-            className={`pb-3 px-2 font-semibold transition-colors relative ${
-              activeTab === 'active' 
-                ? 'text-yo-orange' 
-                : 'text-yo-gray-500 hover:text-yo-gray-700'
-            }`}
-          >
-            Missions actives
-            {activeTab === 'active' && (
-              <motion.div
-                layoutId="activeTab"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-yo-orange"
-              />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('completed')}
-            className={`pb-3 px-2 font-semibold transition-colors relative ${
-              activeTab === 'completed' 
-                ? 'text-yo-orange' 
-                : 'text-yo-gray-500 hover:text-yo-gray-700'
-            }`}
-          >
-            Terminées
-            {activeTab === 'completed' && (
-              <motion.div
-                layoutId="activeTab"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-yo-orange"
-              />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('favorites')}
-            className={`pb-3 px-2 font-semibold transition-colors relative ${
-              activeTab === 'favorites' 
-                ? 'text-yo-orange' 
-                : 'text-yo-gray-500 hover:text-yo-gray-700'
-            }`}
-          >
-            Favoris
-            {activeTab === 'favorites' && (
-              <motion.div
-                layoutId="activeTab"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-yo-orange"
-              />
-            )}
-          </button>
-        </div>
-
-        {/* Missions List */}
-        <div className="space-y-4">
-          {activeTab === 'active' && activeMissions.length === 0 && (
-            <Card className="p-12 text-center">
-              <div className="w-16 h-16 bg-yo-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Briefcase className="w-8 h-8 text-yo-gray-400" />
-              </div>
-              <h3 className="font-display font-bold text-xl text-yo-gray-900 mb-2">
-                Aucune mission active
-              </h3>
-              <p className="text-yo-gray-500 mb-6">
-                Commence par créer ta première mission pour trouver le prestataire idéal
-              </p>
+          {missions.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-yo-gray-600 mb-4">Vous n&apos;avez pas encore de mission</p>
               <Button onClick={() => router.push('/missions/nouvelle')}>
-                <Plus className="w-5 h-5" />
-                Créer ma première mission
+                <Plus className="w-5 h-5 mr-2" />
+                Créer ma première demande
               </Button>
-            </Card>
-          )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {missions.map((mission) => (
+                <Card 
+                  key={mission.id} 
+                  className="p-6 hover:shadow-yo-lg transition cursor-pointer"
+                  onClick={() => router.push(`/missions/${mission.id}`)}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-bold text-lg">{mission.title}</h3>
+                        {getStatusBadge(mission.status)}
+                      </div>
+                      <p className="text-sm text-yo-gray-600 mb-3 line-clamp-2">
+                        {mission.description}
+                      </p>
+                      <div className="flex items-center gap-6 text-sm text-yo-gray-500">
+                        <div className="flex items-center gap-1">
+                          <DollarSign className="w-4 h-4" />
+                          <span className="font-semibold">{mission.budget.toLocaleString()} CFA</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          <span>{new Date(mission.created_at).toLocaleDateString('fr-FR')}</span>
+                        </div>
+                        {mission.candidates_count !== undefined && (
+                          <div className="flex items-center gap-1">
+                            <Eye className="w-4 h-4" />
+                            <span>{mission.candidates_count} candidature(s)</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
 
-          {activeTab === 'active' && activeMissions.map((mission) => (
-            <MissionCard key={mission.id} mission={mission} router={router} />
-          ))}
-
-          {activeTab === 'completed' && completedMissions.length === 0 && (
-            <Card className="p-12 text-center">
-              <div className="w-16 h-16 bg-yo-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Clock className="w-8 h-8 text-yo-gray-400" />
-              </div>
-              <h3 className="font-display font-bold text-xl text-yo-gray-900 mb-2">
-                Aucune mission terminée
-              </h3>
-              <p className="text-yo-gray-500">
-                Tes missions complétées apparaîtront ici
-              </p>
-            </Card>
+                  {mission.selected_provider && (
+                    <div className="flex items-center justify-between pt-4 border-t border-yo-gray-200">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-yo-green-pale rounded-full flex items-center justify-center">
+                          <span className="font-bold text-yo-green-dark">
+                            {mission.selected_provider.first_name[0]}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold">
+                            {mission.selected_provider.first_name} {mission.selected_provider.last_name}
+                          </p>
+                          <p className="text-xs text-yo-gray-500">Prestataire sélectionné</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        <MessageCircle className="w-4 h-4 mr-2" />
+                        Contacter
+                      </Button>
+                    </div>
+                  )}
+                </Card>
+              ))}
+            </div>
           )}
-
-          {activeTab === 'favorites' && (
-            <Card className="p-12 text-center">
-              <div className="w-16 h-16 bg-yo-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Heart className="w-8 h-8 text-yo-gray-400" />
-              </div>
-              <h3 className="font-display font-bold text-xl text-yo-gray-900 mb-2">
-                Aucun favori
-              </h3>
-              <p className="text-yo-gray-500">
-                Ajoute des prestataires à tes favoris pour les retrouver facilement
-              </p>
-            </Card>
-          )}
-        </div>
-      </main>
+        </Card>
+      </div>
     </div>
-  );
-}
-
-interface MissionCardProps {
-  mission: Mission;
-  router: any;
-}
-
-function MissionCard({ mission, router }: MissionCardProps) {
-  const statusConfig: Record<string, { label: string; color: string }> = {
-    open: { label: 'En attente', color: 'bg-yo-yellow-light text-yo-yellow-dark' },
-    in_progress: { label: 'En cours', color: 'bg-yo-orange/10 text-yo-orange' },
-    completed: { label: 'Terminée', color: 'bg-yo-green/10 text-yo-green' },
-  };
-
-  const status = statusConfig[mission.status] || statusConfig.open;
-
-  return (
-    <Card className="p-6 hover:shadow-yo-lg transition-all cursor-pointer" onClick={() => router.push(`/missions/${mission.id}`)}>
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <h3 className="font-display font-bold text-lg text-yo-gray-900">{mission.title}</h3>
-            <Badge className={status.color}>{status.label}</Badge>
-          </div>
-          <p className="text-yo-gray-600 mb-3 line-clamp-2">{mission.description}</p>
-          <div className="flex items-center gap-4 text-sm text-yo-gray-500">
-            <span className="flex items-center gap-1">
-              <MapPin className="w-4 h-4" />
-              {mission.category}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="w-4 h-4" />
-              {new Date(mission.created_at).toLocaleDateString('fr-FR')}
-            </span>
-          </div>
-        </div>
-        <div className="text-right ml-4">
-          <p className="text-sm text-yo-gray-500 mb-1">Budget</p>
-          <p className="font-bold text-yo-orange text-lg">
-            {mission.budget_min.toLocaleString()} - {mission.budget_max.toLocaleString()} F
-          </p>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between pt-4 border-t border-yo-gray-100">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-yo-green/10 rounded-full flex items-center justify-center">
-            <Star className="w-4 h-4 text-yo-green" />
-          </div>
-          <span className="text-sm text-yo-gray-600">
-            <span className="font-semibold text-yo-gray-900">{mission.offers_count || 0}</span> propositions reçues
-          </span>
-        </div>
-        <Button variant="ghost" size="sm" className="text-yo-orange hover:bg-yo-orange/10">
-          Voir les détails
-          <ChevronRight className="w-4 h-4" />
-        </Button>
-      </div>
-    </Card>
   );
 }

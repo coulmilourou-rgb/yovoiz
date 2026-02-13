@@ -18,8 +18,22 @@ export default function HomePage() {
   useEffect(() => {
     if (!loading && !user) {
       router.push('/auth/connexion');
+      return;
     }
-  }, [user, loading, router]);
+
+    // Rediriger vers le dashboard approprié selon le rôle
+    if (!loading && profile) {
+      if (profile.role === 'demandeur' || profile.role === 'client') {
+        router.push('/dashboard/client');
+      } else if (profile.role === 'prestataire' || profile.role === 'provider') {
+        router.push('/dashboard/prestataire');
+      } else if (profile.role === 'both') {
+        // Par défaut, rediriger vers le dashboard client pour les utilisateurs "both"
+        // Ils pourront naviguer entre les deux depuis la navbar
+        router.push('/dashboard/client');
+      }
+    }
+  }, [user, loading, profile, router]);
 
   if (loading) {
     return (
