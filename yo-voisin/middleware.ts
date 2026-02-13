@@ -2,6 +2,12 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+  // TEMPORAIRE : Désactiver le middleware pour le développement local
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔧 Mode DEV - Middleware désactivé');
+    return NextResponse.next();
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
