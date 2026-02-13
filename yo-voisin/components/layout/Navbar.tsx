@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   Search, Bell, LogOut, User, Home, Briefcase, MessageSquare, Settings,
   FileText, CreditCard, Moon, Clock, ChevronRight, Lock, HelpCircle,
-  Shield, UserCircle
+  Shield, UserCircle, Users, Plus, Crown
 } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -106,6 +106,21 @@ export const Navbar: React.FC<NavbarProps> = ({ isConnected = false, user, notif
             <Link href="/missions" className="px-4 py-2 text-yo-gray-700 hover:bg-yo-gray-100 rounded-lg font-medium transition flex items-center gap-2">
               <Briefcase className="w-4 h-4" />
               Missions
+            </Link>
+            <Link href="/offreurs" className="px-4 py-2 text-yo-gray-700 hover:bg-yo-gray-100 rounded-lg font-medium transition flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Offreurs
+            </Link>
+            <Link 
+              href="/missions/nouvelle" 
+              className="px-4 py-2 bg-yo-orange text-white hover:bg-yo-orange-dark rounded-lg font-semibold transition flex items-center gap-2 shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              Demande
+            </Link>
+            <Link href="/abonnement" className="px-4 py-2 text-yo-gray-700 hover:bg-yo-gray-100 rounded-lg font-medium transition flex items-center gap-2">
+              <Crown className="w-4 h-4" />
+              Abonnement
             </Link>
             <Link href="/messages" className="px-4 py-2 text-yo-gray-700 hover:bg-yo-gray-100 rounded-lg font-medium transition flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
