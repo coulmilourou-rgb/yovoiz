@@ -130,18 +130,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       try {
+        console.log('🚀 AuthContext - Initialisation...');
         const { data: { session: currentSession } } = await supabase.auth.getSession();
+        
+        console.log('📦 Session récupérée:', currentSession ? '✅ Oui' : '❌ Non');
+        if (currentSession) {
+          console.log('👤 User ID:', currentSession.user.id);
+          console.log('📧 Email:', currentSession.user.email);
+        }
         
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
           await fetchProfile(currentSession.user.id);
+        } else {
+          console.log('⚠️ Pas de session - Utilisateur non connecté');
         }
       } catch (error) {
-        console.error('Erreur d\'initialisation auth:', error);
+        console.error('❌ Erreur d\'initialisation auth:', error);
       } finally {
         setLoading(false);
+        console.log('✅ AuthContext - Initialisation terminée');
       }
     };
 
@@ -149,6 +159,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
+        console.log('🔔 Auth State Change:', event);
+        console.log('📦 Nouvelle session:', currentSession ? '✅ Oui' : '❌ Non');
+        
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
@@ -159,9 +172,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (event === 'SIGNED_IN') {
+          console.log('✅ Event: SIGNED_IN - Refresh du router');
           router.refresh();
         }
         if (event === 'SIGNED_OUT') {
+          console.log('🚪 Event: SIGNED_OUT - Redirection vers /');
           setProfile(null);
           router.push('/');
         }
