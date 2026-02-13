@@ -51,16 +51,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log('🔍 Chargement du profil pour:', userId);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Erreur chargement profil:', error);
+        // Si le profil n'existe pas, créer un profil minimal
+        if (error.code === 'PGRST116') {
+          console.log('⚠️ Profil introuvable, création d\'un profil par défaut...');
+          const { data: newProfile } = await supabase
+            .from('profiles')
+            .insert({
+              id: userId,
+              first_name: 'Utilisateur',
+              last_name: 'Nouveau',
+              phone: '0000000000',
+              user_type: 'client',
+              role: 'demandeur',
+              commune: 'Abidjan'
+            })
+            .select()
+            .single();
+          
+          if (newProfile) {
+            console.log('✅ Profil créé:', newProfile);
+            setProfile(newProfile);
+            return;
+          }
+        }
+        throw error;
+      }
+
+      console.log('✅ Profil chargé:', data);
       setProfile(data);
     } catch (error) {
-      console.error('Erreur lors du chargement du profil:', error);
+      console.error('❌ Exception lors du chargement du profil:', error);
       setProfile(null);
     }
   };
