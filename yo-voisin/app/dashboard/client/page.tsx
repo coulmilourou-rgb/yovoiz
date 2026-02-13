@@ -146,7 +146,11 @@ export default function ClientDashboard() {
   if (loading || loadingData) {
     return (
       <div className="min-h-screen bg-yo-gray-50">
-        <Navbar isConnected={true} />
+        <Navbar isConnected={!!user} user={profile ? {
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          avatar_url: profile.avatar_url
+        } : undefined} />
         <div className="max-w-7xl mx-auto px-6 py-8">
           {/* Header skeleton */}
           <div className="mb-8">
@@ -184,14 +188,21 @@ export default function ClientDashboard() {
 
   return (
     <div className="min-h-screen bg-yo-gray-50">
-      <Navbar isConnected={true} />
+      <Navbar 
+        isConnected={true} 
+        user={{
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          avatar_url: profile.avatar_url
+        }}
+      />
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Header */}
+        {/* Header avec message de bienvenue */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="font-display font-extrabold text-4xl text-yo-green-dark mb-2">
-              Mon Dashboard Client
+              👋 Bienvenue, {profile.first_name} !
             </h1>
             <p className="text-yo-gray-600 text-lg">
               Gérez vos demandes et suivez vos missions

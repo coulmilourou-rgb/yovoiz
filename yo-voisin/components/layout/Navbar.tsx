@@ -1,9 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Search, Bell } from 'lucide-react';
+import { Search, Bell, LogOut, User, Home, Briefcase, MessageSquare, Settings } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 interface NavbarProps {
   isConnected?: boolean;
@@ -16,11 +18,20 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ isConnected = false, user, notificationCount = 0 }) => {
+  const { signOut } = useAuth();
+  const router = useRouter();
+  const [showMenu, setShowMenu] = useState(false);
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push('/');
+  };
+
   return (
-    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-lg border-b border-yo-gray-200">
+    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-lg border-b border-yo-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center gap-8">
-        {/* Logo */}
-        <Link href={isConnected ? '/home' : '/'} className="flex items-center gap-1 font-display font-black text-2xl">
+        {/* Logo - revient toujours à l'accueil */}
+        <Link href="/" className="flex items-center gap-1 font-display font-black text-2xl hover:opacity-80 transition">
           <span className="text-yo-orange">Y</span>
           <svg viewBox="0 0 120 140" width="32" height="37" xmlns="http://www.w3.org/2000/svg" className="inline-block -mt-1">
             {/* Contour noir */}
@@ -51,6 +62,24 @@ export const Navbar: React.FC<NavbarProps> = ({ isConnected = false, user, notif
           <span className="text-yo-green-dark ml-1">Voiz</span>
         </Link>
 
+        {/* Menu de navigation (si connecté) */}
+        {isConnected && (
+          <div className="hidden md:flex items-center gap-1">
+            <Link href="/home" className="px-4 py-2 text-yo-gray-700 hover:bg-yo-gray-100 rounded-lg font-medium transition flex items-center gap-2">
+              <Home className="w-4 h-4" />
+              Accueil
+            </Link>
+            <Link href="/missions" className="px-4 py-2 text-yo-gray-700 hover:bg-yo-gray-100 rounded-lg font-medium transition flex items-center gap-2">
+              <Briefcase className="w-4 h-4" />
+              Missions
+            </Link>
+            <Link href="/messages" className="px-4 py-2 text-yo-gray-700 hover:bg-yo-gray-100 rounded-lg font-medium transition flex items-center gap-2">
+              <MessageSquare className="w-4 h-4" />
+              Messages
+            </Link>
+          </div>
+        )}
+
         {/* Barre de recherche (si connecté) */}
         {isConnected && (
           <div className="flex-1 max-w-2xl">
@@ -77,15 +106,58 @@ export const Navbar: React.FC<NavbarProps> = ({ isConnected = false, user, notif
                 )}
               </button>
 
-              {/* Avatar */}
-              <Link href="/profile">
-                <Avatar
-                  firstName={user.first_name}
-                  lastName={user.last_name}
-                  imageUrl={user.avatar_url}
-                  size="md"
-                />
-              </Link>
+              {/* Menu utilisateur */}
+              <div className="relative">
+                <button 
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="hover:opacity-80 transition"
+                >
+                  <Avatar
+                    firstName={user.first_name}
+                    lastName={user.last_name}
+                    imageUrl={user.avatar_url}
+                    size="md"
+                  />
+                </button>
+
+                {/* Dropdown menu */}
+                {showMenu && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-yo-gray-200 py-2">
+                    <div className="px-4 py-3 border-b border-yo-gray-200">
+                      <p className="font-semibold text-yo-gray-800">{user.first_name} {user.last_name}</p>
+                      <p className="text-sm text-yo-gray-500">Mon compte</p>
+                    </div>
+                    
+                    <Link 
+                      href="/profile"
+                      className="flex items-center gap-3 px-4 py-2 hover:bg-yo-gray-50 transition"
+                      onClick={() => setShowMenu(false)}
+                    >
+                      <User className="w-4 h-4 text-yo-gray-600" />
+                      <span className="text-yo-gray-700">Mon profil</span>
+                    </Link>
+                    
+                    <Link 
+                      href="/parametres"
+                      className="flex items-center gap-3 px-4 py-2 hover:bg-yo-gray-50 transition"
+                      onClick={() => setShowMenu(false)}
+                    >
+                      <Settings className="w-4 h-4 text-yo-gray-600" />
+                      <span className="text-yo-gray-700">Paramètres</span>
+                    </Link>
+                    
+                    <div className="border-t border-yo-gray-200 mt-2 pt-2">
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full flex items-center gap-3 px-4 py-2 hover:bg-red-50 text-red-600 transition"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Se déconnecter</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </>
           ) : (
             <>
