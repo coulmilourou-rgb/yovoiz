@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { supabase } from '@/lib/supabase';
 import { Navbar } from '@/components/layout/Navbar';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -46,7 +46,6 @@ interface Stats {
 export default function ClientDashboard() {
   const router = useRouter();
   const { user, profile, loading } = useAuth();
-  const supabase = createClientComponentClient();
   
   const [missions, setMissions] = useState<Mission[]>([]);
   const [stats, setStats] = useState<Stats>({
