@@ -165,7 +165,10 @@ export default function HomePage() {
             🏘️ Services près de chez vous
           </h1>
           <p className="text-yo-gray-600 text-lg">
-            Découvrez les demandes dans votre quartier : <span className="font-semibold text-yo-orange">{profile.commune}</span>
+            Découvrez les demandes dans votre zone : <span className="font-semibold text-yo-orange">
+              {profile.commune && profile.commune !== 'Abidjan' ? profile.commune : 'toutes les communes'}
+            </span>
+            {profile.quartier && ` • ${profile.quartier}`}
           </p>
         </div>
 
