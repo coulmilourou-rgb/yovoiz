@@ -60,7 +60,7 @@ interface Stats {
 
 export default function ProviderDashboard() {
   const router = useRouter();
-  const { user, profile, loading } = useAuth();
+  const { user, profile, loading, refreshProfile } = useAuth();
   
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [candidatures, setCandidatures] = useState<Candidature[]>([]);
@@ -73,6 +73,16 @@ export default function ProviderDashboard() {
   const [loadingData, setLoadingData] = useState(true);
   const [activeTab, setActiveTab] = useState<'opportunities' | 'candidatures'>('opportunities');
 
+  // Charger le profil dès l'arrivée sur le dashboard
+  useEffect(() => {
+    if (user && !profile && !loading) {
+      console.log('📥 Dashboard Prestataire - Chargement du profil...');
+      refreshProfile().catch(err => {
+        console.warn('⚠️ Profil non chargé:', err);
+      });
+    }
+  }, [user, profile, loading, refreshProfile]);
+
   useEffect(() => {
     if (!loading && !user) {
       router.push('/auth/connexion');
@@ -80,10 +90,11 @@ export default function ProviderDashboard() {
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (user && profile) {
+    if (user) {
+      // Charger les données même si le profil n'est pas encore chargé
       fetchDashboardData();
     }
-  }, [user, profile]);
+  }, [user]);
 
   const fetchDashboardData = async () => {
     try {

@@ -165,9 +165,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
-        if (currentSession?.user) {
-          await fetchProfile(currentSession.user.id);
-        } else {
+        // ⚠️ NE PAS charger le profil ici - cause AbortError et bloque la redirection
+        // Le profil sera chargé APRÈS la redirection dans le dashboard
+        if (!currentSession?.user) {
           setProfile(null);
         }
 
@@ -181,7 +181,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             : '/dashboard/client';
           
           console.log('✅ SIGNED_IN - Rôle metadata:', userRole, '→ Redirection:', targetRoute);
+          
+          // Redirection immédiate AVANT de charger le profil
           router.push(targetRoute);
+          
+          // Charger le profil EN ARRIÈRE-PLAN après la redirection
+          setTimeout(() => {
+            fetchProfile(currentSession.user.id).catch(err => {
+              console.warn('⚠️ Profil non chargé (AbortError attendu):', err);
+            });
+          }, 100);
         }
         
         if (event === 'SIGNED_OUT') {
@@ -261,12 +270,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(data.session);
         setUser(data.user);
         
-        // Charger le profil immédiatement
-        if (data.user) {
-          console.log('🔍 SignIn - Chargement du profil...');
-          await fetchProfile(data.user.id);
-        }
-        
+        // ⚠️ NE PAS charger le profil ici - la redirection se fait dans onAuthStateChange
+        // Le profil sera chargé APRÈS dans le dashboard
         console.log('✅ SignIn - Contexte mis à jour avec succès');
       } else {
         console.warn('⚠️ SignIn - Pas de session retournée !');
