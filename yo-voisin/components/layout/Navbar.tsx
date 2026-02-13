@@ -2,7 +2,11 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Search, Bell, LogOut, User, Home, Briefcase, MessageSquare, Settings } from 'lucide-react';
+import { 
+  Search, Bell, LogOut, User, Home, Briefcase, MessageSquare, Settings,
+  FileText, CreditCard, Moon, Clock, ChevronRight, Lock, HelpCircle,
+  Shield, UserCircle
+} from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -21,10 +25,22 @@ export const Navbar: React.FC<NavbarProps> = ({ isConnected = false, user, notif
   const { signOut } = useAuth();
   const router = useRouter();
   const [showMenu, setShowMenu] = useState(false);
+  const [absenceMode, setAbsenceMode] = useState(false);
+  const [availableNow, setAvailableNow] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
     router.push('/');
+  };
+
+  const toggleAbsenceMode = () => {
+    setAbsenceMode(!absenceMode);
+    // TODO: Enregistrer dans le profil utilisateur
+  };
+
+  const toggleAvailableNow = () => {
+    setAvailableNow(!availableNow);
+    // TODO: Enregistrer dans le profil utilisateur
   };
 
   return (
@@ -122,39 +138,165 @@ export const Navbar: React.FC<NavbarProps> = ({ isConnected = false, user, notif
 
                 {/* Dropdown menu */}
                 {showMenu && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-yo-gray-200 py-2">
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-2xl border border-yo-gray-200 py-2 max-h-[80vh] overflow-y-auto">
+                    {/* Header */}
                     <div className="px-4 py-3 border-b border-yo-gray-200">
-                      <p className="font-semibold text-yo-gray-800">{user.first_name} {user.last_name}</p>
+                      <p className="font-bold text-yo-gray-900">{user.first_name} {user.last_name}</p>
                       <p className="text-sm text-yo-gray-500">Mon compte</p>
                     </div>
-                    
-                    <Link 
-                      href="/profile"
-                      className="flex items-center gap-3 px-4 py-2 hover:bg-yo-gray-50 transition"
-                      onClick={() => setShowMenu(false)}
-                    >
-                      <User className="w-4 h-4 text-yo-gray-600" />
-                      <span className="text-yo-gray-700">Mon profil</span>
-                    </Link>
-                    
-                    <Link 
-                      href="/parametres"
-                      className="flex items-center gap-3 px-4 py-2 hover:bg-yo-gray-50 transition"
-                      onClick={() => setShowMenu(false)}
-                    >
-                      <Settings className="w-4 h-4 text-yo-gray-600" />
-                      <span className="text-yo-gray-700">Paramètres</span>
-                    </Link>
-                    
-                    <div className="border-t border-yo-gray-200 mt-2 pt-2">
-                      <button
-                        onClick={handleSignOut}
-                        className="w-full flex items-center gap-3 px-4 py-2 hover:bg-red-50 text-red-600 transition"
+
+                    {/* Section: Mon Activité */}
+                    <div className="py-2">
+                      <div className="px-4 py-2">
+                        <p className="text-xs font-bold text-yo-gray-500 uppercase tracking-wide">Mon Activité</p>
+                      </div>
+                      
+                      <Link 
+                        href="/mes-demandes"
+                        className="flex items-center justify-between px-4 py-2.5 hover:bg-yo-gray-50 transition group"
+                        onClick={() => setShowMenu(false)}
                       >
-                        <LogOut className="w-4 h-4" />
-                        <span>Se déconnecter</span>
-                      </button>
+                        <div className="flex items-center gap-3">
+                          <FileText className="w-4 h-4 text-yo-gray-600 group-hover:text-yo-green" />
+                          <span className="text-yo-gray-700 group-hover:text-yo-gray-900">Mes demandes</span>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-yo-gray-400" />
+                      </Link>
+                      
+                      <Link 
+                        href="/mes-paiements"
+                        className="flex items-center justify-between px-4 py-2.5 hover:bg-yo-gray-50 transition group"
+                        onClick={() => setShowMenu(false)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <CreditCard className="w-4 h-4 text-yo-gray-600 group-hover:text-yo-green" />
+                          <span className="text-yo-gray-700 group-hover:text-yo-gray-900">Mes paiements reçus</span>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-yo-gray-400" />
+                      </Link>
+
+                      {/* Toggle Mode Absence */}
+                      <div className="px-4 py-2.5 hover:bg-yo-gray-50 transition">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Moon className="w-4 h-4 text-yo-gray-600" />
+                            <div>
+                              <p className="text-yo-gray-700">Mode Absence</p>
+                              <p className="text-xs text-yo-gray-500">Vous apparaissez hors ligne</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={toggleAbsenceMode}
+                            className={`relative w-11 h-6 rounded-full transition-colors ${
+                              absenceMode ? 'bg-yo-orange' : 'bg-yo-gray-300'
+                            }`}
+                          >
+                            <span
+                              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+                                absenceMode ? 'translate-x-5' : 'translate-x-0'
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Toggle Dispo dans l'heure */}
+                      <div className="px-4 py-2.5 hover:bg-yo-gray-50 transition">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Clock className="w-4 h-4 text-yo-gray-600" />
+                            <div>
+                              <p className="text-yo-gray-700">Dispo dans l'heure</p>
+                              <p className="text-xs text-yo-gray-500">Disponible immédiatement</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={toggleAvailableNow}
+                            className={`relative w-11 h-6 rounded-full transition-colors ${
+                              availableNow ? 'bg-yo-green' : 'bg-yo-gray-300'
+                            }`}
+                          >
+                            <span
+                              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+                                availableNow ? 'translate-x-5' : 'translate-x-0'
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Divider */}
+                    <div className="border-t border-yo-gray-200 my-2" />
+
+                    {/* Section: Mes informations */}
+                    <div className="py-2">
+                      <div className="px-4 py-2">
+                        <p className="text-xs font-bold text-yo-gray-500 uppercase tracking-wide">Mes informations</p>
+                      </div>
+                      
+                      <Link 
+                        href="/profile/informations"
+                        className="flex items-center justify-between px-4 py-2.5 hover:bg-yo-gray-50 transition group"
+                        onClick={() => setShowMenu(false)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <UserCircle className="w-4 h-4 text-yo-gray-600 group-hover:text-yo-green" />
+                          <span className="text-yo-gray-700 group-hover:text-yo-gray-900">Informations personnelles</span>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-yo-gray-400" />
+                      </Link>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="border-t border-yo-gray-200 my-2" />
+
+                    {/* Section: Connexion et Sécurité */}
+                    <div className="py-2">
+                      <div className="px-4 py-2">
+                        <p className="text-xs font-bold text-yo-gray-500 uppercase tracking-wide">Connexion et Sécurité</p>
+                      </div>
+                      
+                      <Link 
+                        href="/profile/security"
+                        className="flex items-center justify-between px-4 py-2.5 hover:bg-yo-gray-50 transition group"
+                        onClick={() => setShowMenu(false)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Lock className="w-4 h-4 text-yo-gray-600 group-hover:text-yo-green" />
+                          <span className="text-yo-gray-700 group-hover:text-yo-gray-900">Identifiants et mot de passe</span>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-yo-gray-400" />
+                      </Link>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="border-t border-yo-gray-200 my-2" />
+
+                    {/* Aide */}
+                    <Link 
+                      href="/aide"
+                      className="flex items-center justify-between px-4 py-2.5 hover:bg-yo-gray-50 transition group"
+                      onClick={() => setShowMenu(false)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <HelpCircle className="w-4 h-4 text-yo-gray-600 group-hover:text-yo-green" />
+                        <span className="text-yo-gray-700 group-hover:text-yo-gray-900">Aide</span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-yo-gray-400" />
+                    </Link>
+
+                    {/* Divider */}
+                    <div className="border-t border-yo-gray-200 my-2" />
+                    
+                    {/* Déconnexion */}
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 text-red-600 transition"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span className="font-semibold">Se déconnecter</span>
+                    </button>
                   </div>
                 )}
               </div>
