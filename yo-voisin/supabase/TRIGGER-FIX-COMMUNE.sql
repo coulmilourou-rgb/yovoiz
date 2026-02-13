@@ -27,8 +27,8 @@ BEGIN
     COALESCE(NEW.raw_user_meta_data->>'phone', '0000000000'),
     COALESCE(NEW.raw_user_meta_data->>'user_type', 'client')::user_type,
     COALESCE(NEW.raw_user_meta_data->>'role', 'demandeur'),
-    COALESCE(NEW.raw_user_meta_data->>'commune', 'Non spécifiée'),  -- ✅ Récupère la vraie commune
-    NEW.raw_user_meta_data->>'quartier'  -- ✅ Récupère le quartier (peut être null)
+    COALESCE(NEW.raw_user_meta_data->>'commune', 'Non spécifiée'),
+    NEW.raw_user_meta_data->>'quartier'
   )
   ON CONFLICT (id) DO NOTHING;
   
