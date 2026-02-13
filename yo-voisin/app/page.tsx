@@ -236,14 +236,14 @@ function HeroSection({ onOpenVideo }: { onOpenVideo: () => void }) {
           </motion.p>
         </div>
 
-        {/* Barre de recherche améliorée */}
+        {/* Barre de recherche améliorée avec glassmorphism */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
           className="max-w-4xl mx-auto mb-8"
         >
-          <div className="bg-white rounded-2xl shadow-2xl p-2 flex flex-col md:flex-row gap-2">
+          <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(27,122,61,0.15)] ring-1 ring-black/5 p-2 flex flex-col md:flex-row gap-2 hover:shadow-[0_12px_48px_rgba(27,122,61,0.2)] transition-shadow duration-300">
             {/* Service */}
             <div className="flex-1 flex items-center gap-3 px-4 py-2">
               <Search className="w-5 h-5 text-yo-gray-400 shrink-0" />
@@ -282,21 +282,23 @@ function HeroSection({ onOpenVideo }: { onOpenVideo: () => void }) {
             </Button>
           </div>
 
-          {/* Suggestions rapides */}
+          {/* Suggestions rapides avec glassmorphism */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}
             className="flex flex-wrap justify-center gap-2 mt-4"
           >
-            <span className="text-white/70 text-sm">Populaires :</span>
+            <span className="text-white/90 text-sm font-semibold">Populaires :</span>
             {['Ménage', 'Plomberie', 'Cours particuliers', 'Déménagement'].map((term) => (
-              <button
+              <motion.button
                 key={term}
-                className="px-3 py-1 bg-white/20 hover:bg-white/30 text-white text-sm rounded-full backdrop-blur-sm transition"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-4 py-1.5 bg-white/20 hover:bg-white/30 text-white text-sm rounded-full backdrop-blur-md border border-white/30 transition shadow-lg hover:shadow-xl"
               >
                 {term}
-              </button>
+              </motion.button>
             ))}
           </motion.div>
         </motion.div>
