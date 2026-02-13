@@ -1,64 +1,13 @@
-import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
-        },
-        set(name: string, value: string, options) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          });
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-        },
-        remove(name: string, options) {
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          });
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          });
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          });
-        },
-      },
-    }
-  );
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
   const { pathname } = request.nextUrl;
+
+  // ⚠️ SIMPLIFIÉ: Vérification UNIQUEMENT basée sur les cookies
+  // Ne pas appeler supabase.auth.getSession() - cause AbortError
+  const hasAuthCookie = request.cookies.has('sb-hfrmctsvpszqdizritoe-auth-token') ||
+                        request.cookies.has('sb-hfrmctsvpszqdizritoe-auth-token.0') ||
+                        request.cookies.has('supabase-auth-token');
 
   // Routes publiques (accessibles sans authentification)
   const publicRoutes = [
@@ -68,6 +17,7 @@ export async function middleware(request: NextRequest) {
     '/auth/mot-de-passe-oublie',
     '/auth/reset-password',
     '/auth/verify-email',
+    '/auth/confirm-email',
   ];
 
   // Routes d'authentification (rediriger si déjà connecté)
@@ -93,21 +43,22 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
 
-  // Si l'utilisateur est connecté et essaie d'accéder à une page d'auth
-  if (session && isAuthRoute) {
-    console.log('🔄 Utilisateur connecté redirigé de auth vers /dashboard/client');
+  // Si l'utilisateur a un cookie auth et essaie d'accéder à une page d'auth
+  if (hasAuthCookie && isAuthRoute) {
+    console.log('🔄 Cookie détecté - Redirection vers /dashboard/client');
     return NextResponse.redirect(new URL('/dashboard/client', request.url));
   }
 
-  // Si l'utilisateur n'est pas connecté et essaie d'accéder à une route protégée
-  if (!session && isProtectedRoute) {
-    console.log('🔒 Accès refusé - Redirection vers /auth/connexion');
+  // Si l'utilisateur n'a PAS de cookie et essaie d'accéder à une route protégée
+  if (!hasAuthCookie && isProtectedRoute) {
+    console.log('🔒 Pas de cookie auth - Redirection vers /auth/connexion');
     const redirectUrl = new URL('/auth/connexion', request.url);
     redirectUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
-  return response;
+  // Laisser passer toutes les autres requêtes
+  return NextResponse.next();
 }
 
 export const config = {
