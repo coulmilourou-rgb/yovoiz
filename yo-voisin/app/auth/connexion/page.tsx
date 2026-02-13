@@ -41,10 +41,10 @@ export default function ConnexionPage() {
         return;
       }
 
-      console.log('✅ Connexion réussie, redirection vers /home...');
+      console.log('✅ Connexion réussie, redirection vers /test-dashboard...');
       
-      // Redirection immédiate avec window.location (force le rechargement)
-      window.location.href = '/home';
+      // Redirection vers page de test
+      window.location.href = '/test-dashboard';
       
     } catch (err) {
       console.error('❌ Exception connexion:', err);
