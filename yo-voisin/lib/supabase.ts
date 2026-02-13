@@ -8,24 +8,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables. Check your .env.local file.');
 }
 
-// Fix pour l'erreur AbortError avec storage
+// Client Supabase pour l'application
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
-    flowType: 'pkce',
-    // Augmenter le timeout des locks pour éviter AbortError
-    lock: {
-      type: 'tab',
-      retryInterval: 100,
-      acquireTimeout: 10000 // 10 secondes au lieu de 2
-    }
-  },
-  global: {
-    headers: {
-      'x-client-info': 'supabase-js-web',
-    },
   },
 });
 
