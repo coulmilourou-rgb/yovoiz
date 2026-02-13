@@ -25,23 +25,32 @@ export default function ConnexionPage() {
     setLoading(true);
 
     try {
+      console.log('🔐 Tentative de connexion:', email);
       const { error: signInError } = await signIn(email, password);
 
       if (signInError) {
+        console.error('❌ Erreur signIn:', signInError);
         if (signInError.message.includes('Invalid login credentials')) {
           setError('Email ou mot de passe incorrect');
         } else if (signInError.message.includes('Email not confirmed')) {
           setError('Veuillez confirmer votre email avant de vous connecter');
         } else {
-          setError('Une erreur est survenue. Réessayez.');
+          setError(`Erreur: ${signInError.message}`);
         }
         setLoading(false);
         return;
       }
 
-      router.push('/home');
+      console.log('✅ Connexion réussie, redirection vers /home...');
+      
+      // Petit délai pour laisser le temps à l'auth state de se mettre à jour
+      setTimeout(() => {
+        router.push('/home');
+      }, 500);
+      
     } catch (err) {
-      setError('Une erreur inattendue est survenue');
+      console.error('❌ Exception connexion:', err);
+      setError(`Erreur technique: ${err instanceof Error ? err.message : 'Inconnue'}`);
       setLoading(false);
     }
   };
