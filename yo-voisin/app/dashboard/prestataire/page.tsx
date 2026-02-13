@@ -98,32 +98,18 @@ export default function ProviderDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch opportunities (published missions)
+      // Fetch opportunities (published missions) - simplifié
       const { data: opportunitiesData, error: oppError } = await supabase
         .from('missions')
-        .select(`
-          *,
-          client:profiles!missions_client_id_fkey(first_name, last_name, average_rating)
-        `)
+        .select('*')
         .eq('status', 'published')
         .order('created_at', { ascending: false })
         .limit(20);
 
-      if (oppError) throw oppError;
+      if (oppError) {
+        console.error('Erreur chargement opportunités:', oppError);
+      }
       setOpportunities(opportunitiesData || []);
-
-      // Fetch my candidatures
-      const { data: candidaturesData, error: candError } = await supabase
-        .from('mission_candidates')
-        .select(`
-          *,
-          mission:missions(id, title, status)
-        `)
-        .eq('provider_id', user?.id)
-        .order('created_at', { ascending: false });
-
-      if (candError) throw candError;
-      setCandidatures(candidaturesData || []);
 
       // Fetch my active missions (as provider)
       const { data: myMissions, error: myMissionsError } = await supabase
@@ -132,17 +118,18 @@ export default function ProviderDashboard() {
         .eq('provider_id', user?.id)
         .eq('status', 'in_progress');
 
-      if (myMissionsError) throw myMissionsError;
+      if (myMissionsError) {
+        console.error('Erreur chargement mes missions:', myMissionsError);
+      }
 
       // Calculate stats
       const totalEarned = await calculateTotalEarned();
-      const pendingCandidatures = candidaturesData?.filter(c => c.status === 'pending').length || 0;
 
       setStats({
         active_missions: myMissions?.length || 0,
         total_earned: totalEarned,
         average_rating: profile?.average_rating || 0,
-        pending_candidatures: pendingCandidatures
+        pending_candidatures: 0 // Temporaire - sera calculé quand mission_candidates existera
       });
 
     } catch (error) {

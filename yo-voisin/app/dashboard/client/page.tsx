@@ -83,19 +83,17 @@ export default function ClientDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch missions
+      // Fetch missions (simplifié - sans relations complexes pour l'instant)
       const { data: missionsData, error: missionsError } = await supabase
         .from('missions')
-        .select(`
-          *,
-          candidates:mission_candidates(count),
-          selected_provider:profiles!missions_provider_id_fkey(first_name, last_name, avatar_url)
-        `)
+        .select('*')
         .eq('client_id', user?.id)
         .order('created_at', { ascending: false })
         .limit(10);
 
-      if (missionsError) throw missionsError;
+      if (missionsError) {
+        console.error('Erreur chargement missions:', missionsError);
+      }
 
       setMissions(missionsData || []);
 
