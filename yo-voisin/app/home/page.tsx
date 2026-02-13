@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
   MapPin, Clock, Euro, TrendingUp, Filter, 
   Plus, Send, Image as ImageIcon, Paperclip,
-  Search, Star, Users, CheckCircle
+  Search, Star, Users, CheckCircle, Loader2
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -48,6 +48,12 @@ export default function HomePage() {
   const [quickPostText, setQuickPostText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [filterCommune, setFilterCommune] = useState('all');
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  
+  const observerTarget = useRef<HTMLDivElement>(null);
+  const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
     if (!loading && !user) {
@@ -59,14 +65,45 @@ export default function HomePage() {
     if (profile) {
       // Par défaut, filtrer par la commune de l'utilisateur
       setFilterCommune(profile.commune || 'all');
-      fetchMissions(profile.commune);
+      fetchMissions(profile.commune, 0, true);
     }
   }, [profile]);
 
-  const fetchMissions = async (commune?: string) => {
+  // Intersection Observer pour le scroll infini
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore && !loadingMissions) {
+          loadMoreMissions();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [hasMore, loadingMore, loadingMissions]);
+
+  const fetchMissions = async (commune?: string, pageNum = 0, reset = false) => {
     try {
-      setLoadingMissions(true);
+      if (reset) {
+        setLoadingMissions(true);
+        setMissions([]);
+      } else {
+        setLoadingMore(true);
+      }
       
+      const from = pageNum * ITEMS_PER_PAGE;
+      const to = from + ITEMS_PER_PAGE - 1;
+
       let query = supabase
         .from('missions')
         .select(`
@@ -78,29 +115,54 @@ export default function HomePage() {
             average_rating,
             commune
           )
-        `)
+        `, { count: 'exact' })
         .eq('status', 'published')
         .order('created_at', { ascending: false })
-        .limit(20);
+        .range(from, to);
 
       // Filtrer par commune si spécifié
       if (commune && commune !== 'all') {
         query = query.eq('commune', commune);
       }
 
-      const { data, error } = await query;
+      const { data, error, count } = await query;
 
       if (error) {
         console.error('Erreur chargement missions:', error);
         return;
       }
 
-      setMissions(data || []);
+      const newMissions = data || [];
+      
+      if (reset) {
+        setMissions(newMissions);
+      } else {
+        setMissions((prev) => [...prev, ...newMissions]);
+      }
+
+      // Vérifier s'il reste des missions à charger
+      const totalLoaded = reset ? newMissions.length : missions.length + newMissions.length;
+      setHasMore(count ? totalLoaded < count : false);
+      
     } catch (error) {
       console.error('Erreur:', error);
     } finally {
       setLoadingMissions(false);
+      setLoadingMore(false);
     }
+  };
+
+  const loadMoreMissions = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchMissions(filterCommune === 'all' ? undefined : filterCommune, nextPage, false);
+  };
+
+  const handleFilterChange = (commune: string) => {
+    setFilterCommune(commune);
+    setPage(0);
+    setHasMore(true);
+    fetchMissions(commune === 'all' ? undefined : commune, 0, true);
   };
 
   const handleQuickPost = () => {
@@ -188,20 +250,14 @@ export default function HomePage() {
         <div className="flex items-center gap-4 mb-6">
           <Button
             variant={filterCommune === 'all' ? 'primary' : 'secondary'}
-            onClick={() => {
-              setFilterCommune('all');
-              fetchMissions();
-            }}
+            onClick={() => handleFilterChange('all')}
             size="sm"
           >
             Toutes les zones
           </Button>
           <Button
             variant={filterCommune === profile.commune ? 'primary' : 'secondary'}
-            onClick={() => {
-              setFilterCommune(profile.commune);
-              fetchMissions(profile.commune);
-            }}
+            onClick={() => handleFilterChange(profile.commune)}
             size="sm"
           >
             <MapPin className="w-4 h-4 mr-2" />
@@ -302,6 +358,30 @@ export default function HomePage() {
                   </Card>
                 </motion.div>
               ))
+            )}
+
+            {/* Indicateur de chargement pour scroll infini */}
+            {loadingMore && (
+              <Card className="p-8">
+                <div className="flex items-center justify-center gap-3 text-yo-gray-500">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Chargement de plus de demandes...</span>
+                </div>
+              </Card>
+            )}
+
+            {/* Observateur pour détecter le scroll */}
+            {hasMore && !loadingMissions && (
+              <div ref={observerTarget} className="h-10" />
+            )}
+
+            {/* Message fin de liste */}
+            {!hasMore && missions.length > 0 && (
+              <Card className="p-6 text-center">
+                <p className="text-yo-gray-500 text-sm">
+                  ✨ Vous avez vu toutes les demandes disponibles
+                </p>
+              </Card>
             )}
           </div>
 
