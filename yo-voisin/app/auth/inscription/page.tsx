@@ -82,26 +82,34 @@ export default function InscriptionPage() {
     setLoading(true);
 
     try {
+      const fullName = `${formData.first_name} ${formData.last_name}`.trim();
+      
       console.log('📝 Données inscription:', {
         email: formData.email,
         role: formData.role,
+        user_type: formData.role,
         first_name: formData.first_name,
         last_name: formData.last_name,
+        full_name: fullName,
         phone: formData.phone,
         commune: formData.commune,
         quartier: formData.quartier,
       });
 
+      const signUpData = {
+        user_type: formData.role as 'client' | 'provider' | 'both',
+        full_name: fullName,
+        phone: formData.phone,
+        commune: formData.commune,
+        quartier: formData.quartier,
+      };
+      
+      console.log('🚀 Envoi à signUp:', signUpData);
+      
       const { error: signUpError } = await signUp(
         formData.email,
         formData.password,
-        {
-          user_type: formData.role as 'client' | 'provider' | 'both',
-          full_name: `${formData.first_name} ${formData.last_name}`.trim(),
-          phone: formData.phone,
-          commune: formData.commune,
-          quartier: formData.quartier,
-        }
+        signUpData
       );
 
       if (signUpError) {
