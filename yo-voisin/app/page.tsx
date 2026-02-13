@@ -10,6 +10,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { VideoModal } from '@/components/features/VideoModal';
 import { CATEGORIES, COMMUNES } from '@/lib/constants';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   Search, Wrench, Lock, CheckCircle, Star, 
   MapPin, ChevronDown, Play, TrendingUp,
@@ -21,10 +22,18 @@ import {
 
 export default function Home() {
   const [showVideoModal, setShowVideoModal] = useState(false);
+  const { user, profile } = useAuth();
 
   return (
     <main className="min-h-screen">
-      <Navbar isConnected={false} />
+      <Navbar 
+        isConnected={!!user} 
+        user={profile ? {
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          avatar_url: profile.avatar_url
+        } : undefined}
+      />
 
       {/* HERO SECTION AMÉLIORÉ */}
       <HeroSection onOpenVideo={() => setShowVideoModal(true)} />

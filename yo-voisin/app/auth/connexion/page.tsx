@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -12,12 +12,22 @@ import { Card } from '@/components/ui/Card';
 
 export default function ConnexionPage() {
   const router = useRouter();
-  const { signIn } = useAuth();
+  const { signIn, user, profile } = useAuth();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Rediriger si déjà connecté
+  useEffect(() => {
+    if (user && profile) {
+      const targetRoute = profile.role === 'prestataire' 
+        ? '/dashboard/prestataire' 
+        : '/dashboard/client';
+      router.push(targetRoute);
+    }
+  }, [user, profile, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

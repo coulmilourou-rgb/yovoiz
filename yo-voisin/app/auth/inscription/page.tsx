@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -42,11 +42,21 @@ export interface SignupData {
 
 export default function InscriptionPage() {
   const router = useRouter();
-  const { signUp } = useAuth();
+  const { signUp, user, profile } = useAuth();
   
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Rediriger si déjà connecté
+  useEffect(() => {
+    if (user && profile) {
+      const targetRoute = profile.role === 'prestataire' 
+        ? '/dashboard/prestataire' 
+        : '/dashboard/client';
+      router.push(targetRoute);
+    }
+  }, [user, profile, router]);
 
   const [formData, setFormData] = useState<SignupData>({
     role: '',
