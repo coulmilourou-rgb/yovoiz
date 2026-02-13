@@ -97,21 +97,24 @@ export default function NouvelleMission() {
           client_id: user.id,
           title: formData.title,
           description: formData.description,
-          category: formData.category,
+          category: formData.category, // TEMPORAIRE : à remplacer par category_id
           commune: formData.commune,
-          quartier: formData.quartier,
-          address_details: formData.address_details,
-          budget_min: parseInt(formData.budget_min),
-          budget_max: parseInt(formData.budget_max),
+          quartier: formData.quartier || null,
+          address: formData.address_details || formData.commune, // address requis
+          budget_min: formData.budget_min ? parseInt(formData.budget_min) : null,
+          budget_max: formData.budget_max ? parseInt(formData.budget_max) : null,
           urgency: formData.urgency,
-          preferred_date: formData.preferred_date,
+          preferred_date: formData.preferred_date || null,
           status: 'published',
         })
         .select()
         .single();
 
       if (error) {
-        console.error('Erreur Supabase:', error);
+        console.error('Erreur Supabase détaillée:', error);
+        console.error('Message:', error.message);
+        console.error('Details:', error.details);
+        console.error('Hint:', error.hint);
         throw error;
       }
 
@@ -333,7 +336,7 @@ function Step2Description({ formData, updateField }: any) {
       exit={{ opacity: 0, y: -20 }}
     >
       <h1 className="font-display font-bold text-3xl text-yo-gray-900 mb-2">
-        Décris ta mission en détail
+        Décris ta demande en détail
       </h1>
       <p className="text-yo-gray-600 mb-8">
         Plus tu donnes de détails, meilleures seront les propositions que tu recevras
@@ -387,7 +390,7 @@ function Step3Location({ formData, updateField }: any) {
       exit={{ opacity: 0, y: -20 }}
     >
       <h1 className="font-display font-bold text-3xl text-yo-gray-900 mb-2">
-        Où se situe la mission ?
+        Où se situe ta demande ?
       </h1>
       <p className="text-yo-gray-600 mb-8">
         Ces informations permettront aux prestataires de ton secteur de te proposer leurs services
