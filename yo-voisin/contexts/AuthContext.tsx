@@ -172,8 +172,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (event === 'SIGNED_IN') {
-          console.log('✅ Event: SIGNED_IN - Refresh du router');
-          router.refresh();
+          console.log('✅ Event: SIGNED_IN - Redirection vers /home');
+          // Redirection immédiate après connexion
+          window.location.replace('/home');
         }
         if (event === 'SIGNED_OUT') {
           console.log('🚪 Event: SIGNED_OUT - Redirection vers /');

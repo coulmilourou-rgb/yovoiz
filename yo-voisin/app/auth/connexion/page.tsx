@@ -41,13 +41,8 @@ export default function ConnexionPage() {
         return;
       }
 
-      console.log('✅ Connexion réussie, redirection vers /home...');
-      
-      // Attendre que le contexte se mette à jour
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Forcer une redirection complète avec rechargement
-      window.location.href = '/home';
+      console.log('✅ Connexion réussie !');
+      // Ne pas gérer la redirection ici - laisser le AuthContext.onAuthStateChange le faire
       
     } catch (err) {
       console.error('❌ Exception connexion:', err);
