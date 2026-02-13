@@ -5,9 +5,15 @@ export async function middleware(request: NextRequest) {
 
   // ⚠️ SIMPLIFIÉ: Vérification UNIQUEMENT basée sur les cookies
   // Ne pas appeler supabase.auth.getSession() - cause AbortError
-  const hasAuthCookie = request.cookies.has('sb-hfrmctsvpszqdizritoe-auth-token') ||
-                        request.cookies.has('sb-hfrmctsvpszqdizritoe-auth-token.0') ||
-                        request.cookies.has('supabase-auth-token');
+  
+  // Détecter TOUS les cookies Supabase auth (peu importe le nom exact)
+  const allCookies = request.cookies.getAll();
+  const hasAuthCookie = allCookies.some(cookie => 
+    cookie.name.startsWith('sb-') && cookie.name.includes('auth-token')
+  );
+  
+  console.log('🍪 Cookies détectés:', allCookies.map(c => c.name).join(', '));
+  console.log('🔐 Auth cookie présent?', hasAuthCookie);
 
   // Routes publiques (accessibles sans authentification)
   const publicRoutes = [

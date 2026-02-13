@@ -180,10 +180,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             ? '/dashboard/prestataire' 
             : '/dashboard/client';
           
-          console.log('✅ SIGNED_IN - Rôle metadata:', userRole, '→ Redirection:', targetRoute);
+          console.log('✅ SIGNED_IN Event détecté');
+          console.log('   📧 Email:', currentSession.user.email);
+          console.log('   🆔 User ID:', currentSession.user.id);
+          console.log('   📋 Metadata:', userMetadata);
+          console.log('   👤 Rôle détecté:', userRole);
+          console.log('   🎯 Redirection vers:', targetRoute);
+          console.log('   🍪 Cookies:', document.cookie.split(';').filter(c => c.includes('sb-')));
           
           // Redirection immédiate AVANT de charger le profil
+          console.log('🚀 Déclenchement router.push...');
           router.push(targetRoute);
+          console.log('✅ router.push appelé');
           
           // Charger le profil EN ARRIÈRE-PLAN après la redirection
           setTimeout(() => {
