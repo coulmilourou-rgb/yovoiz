@@ -8,6 +8,8 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { Skeleton, SkeletonCard } from '@/components/ui/Skeleton';
+import { EmptyMissions } from '@/components/ui/EmptyState';
 import { 
   Plus, 
   Clock, 
@@ -134,8 +136,35 @@ export default function ClientDashboard() {
 
   if (loading || loadingData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yo-green"></div>
+      <div className="min-h-screen bg-yo-gray-50">
+        <Navbar isConnected={true} />
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          {/* Header skeleton */}
+          <div className="mb-8">
+            <Skeleton width="40%" height={40} className="mb-2" />
+            <Skeleton width="30%" height={20} />
+          </div>
+
+          {/* Stats cards skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i} className="p-6">
+                <Skeleton width="60%" height={20} className="mb-2" />
+                <Skeleton width="40%" height={36} />
+              </Card>
+            ))}
+          </div>
+
+          {/* Missions skeleton */}
+          <Card className="p-6">
+            <Skeleton width="30%" height={28} className="mb-6" />
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -218,13 +247,7 @@ export default function ClientDashboard() {
           </h2>
 
           {missions.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-yo-gray-600 mb-4">Vous n&apos;avez pas encore de mission</p>
-              <Button onClick={() => router.push('/missions/nouvelle')}>
-                <Plus className="w-5 h-5 mr-2" />
-                Créer ma première demande
-              </Button>
-            </div>
+            <EmptyMissions onCreateMission={() => router.push('/missions/nouvelle')} />
           ) : (
             <div className="space-y-4">
               {missions.map((mission) => (

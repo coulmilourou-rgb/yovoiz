@@ -8,6 +8,8 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { Skeleton, SkeletonCard } from '@/components/ui/Skeleton';
+import { EmptyOpportunities } from '@/components/ui/EmptyState';
 import { 
   Search, 
   Briefcase, 
@@ -168,8 +170,29 @@ export default function ProviderDashboard() {
 
   if (loading || loadingData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yo-green"></div>
+      <div className="min-h-screen bg-yo-gray-50">
+        <Navbar isConnected={true} />
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="mb-8">
+            <Skeleton width="45%" height={40} className="mb-2" />
+            <Skeleton width="35%" height={20} />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i} className="p-6">
+                <Skeleton width="60%" height={20} className="mb-2" />
+                <Skeleton width="40%" height={36} />
+              </Card>
+            ))}
+          </div>
+          <Card className="p-6">
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -266,10 +289,7 @@ export default function ProviderDashboard() {
         {activeTab === 'opportunities' ? (
           <div className="space-y-4">
             {opportunities.length === 0 ? (
-              <Card className="p-12 text-center">
-                <Search className="w-12 h-12 text-yo-gray-400 mx-auto mb-4" />
-                <p className="text-yo-gray-600">Aucune opportunité disponible pour le moment</p>
-              </Card>
+              <EmptyOpportunities />
             ) : (
               opportunities.map((opportunity) => (
                 <Card 
