@@ -202,12 +202,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      console.log('🔐 SignIn - Début de la connexion...');
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    return { error };
+      console.log('📦 SignIn - Réponse Supabase:');
+      console.log('  - Data:', data);
+      console.log('  - Error:', error);
+      console.log('  - Session:', data?.session);
+      console.log('  - User:', data?.user);
+
+      if (error) {
+        console.error('❌ SignIn - Erreur:', error);
+        return { error };
+      }
+
+      if (data?.session) {
+        console.log('✅ SignIn - Session créée, mise à jour du contexte...');
+        setSession(data.session);
+        setUser(data.user);
+        
+        // Charger le profil immédiatement
+        if (data.user) {
+          console.log('🔍 SignIn - Chargement du profil...');
+          await fetchProfile(data.user.id);
+        }
+        
+        console.log('✅ SignIn - Contexte mis à jour avec succès');
+      } else {
+        console.warn('⚠️ SignIn - Pas de session retournée !');
+      }
+
+      return { error: null };
+    } catch (err) {
+      console.error('❌ SignIn - Exception:', err);
+      return { error: err as AuthError };
+    }
   };
 
   const signOut = async () => {

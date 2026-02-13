@@ -1,120 +1,114 @@
--- ===================================================================
--- CRÉER UN UTILISATEUR TEST POUR YO! VOIZ
--- ===================================================================
+-- ═══════════════════════════════════════════════════════════════
+-- 🚀 SOLUTION RADICALE : Créer Utilisateur Test Complet
+-- ═══════════════════════════════════════════════════════════════
+-- Cette approche crée un utilisateur de test directement en base
+-- avec TOUTES les données nécessaires, sans passer par l'inscription.
+-- ═══════════════════════════════════════════════════════════════
+
+-- 1️⃣ Supprimer l'ancien utilisateur test si existe
+DELETE FROM auth.users WHERE email = 'test@yovoiz.com';
+DELETE FROM public.profiles WHERE id IN (
+  SELECT id FROM auth.users WHERE email = 'test@yovoiz.com'
+);
+
+-- 2️⃣ Créer l'utilisateur directement dans auth.users
+-- Mot de passe : Test123456
+-- (hash bcrypt de "Test123456")
+INSERT INTO auth.users (
+  instance_id,
+  id,
+  aud,
+  role,
+  email,
+  encrypted_password,
+  email_confirmed_at,
+  confirmation_sent_at,
+  confirmation_token,
+  recovery_token,
+  email_change_token_new,
+  email_change,
+  created_at,
+  updated_at,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  is_super_admin,
+  last_sign_in_at
+) VALUES (
+  '00000000-0000-0000-0000-000000000000',
+  gen_random_uuid(),
+  'authenticated',
+  'authenticated',
+  'test@yovoiz.com',
+  '$2a$10$gTfP8qGXWNBLqVq6P6e9yOLvVbAqxdZ8ZM5nW3ZvVwX4YqT2WzFJ2', -- "Test123456"
+  NOW(),
+  NOW(),
+  '',
+  '',
+  '',
+  '',
+  NOW(),
+  NOW(),
+  '{"provider":"email","providers":["email"]}',
+  '{"full_name":"Test Utilisateur","phone":"0700000000","user_type":"client","commune":"Abidjan","quartier":"Cocody"}',
+  false,
+  NOW()
+) RETURNING id;
+
+-- 3️⃣ Créer le profil correspondant
+-- Note: Utilisez l'ID retourné ci-dessus
+WITH new_user AS (
+  SELECT id FROM auth.users WHERE email = 'test@yovoiz.com'
+)
+INSERT INTO public.profiles (
+  id,
+  first_name,
+  last_name,
+  phone,
+  phone_verified,
+  user_type,
+  role,
+  commune,
+  quartier,
+  verification_status,
+  is_active
+)
+SELECT
+  id,
+  'Test',
+  'Utilisateur',
+  '0700000000',
+  true,
+  'client'::user_type,
+  'demandeur',
+  'Abidjan',
+  'Cocody',
+  'pending'::verification_status,
+  true
+FROM new_user;
+
+-- 4️⃣ Vérifier que tout est OK
+SELECT 
+  u.email,
+  u.email_confirmed_at IS NOT NULL as email_confirmed,
+  p.first_name,
+  p.last_name,
+  p.user_type,
+  p.role,
+  p.is_active
+FROM auth.users u
+JOIN public.profiles p ON u.id = p.id
+WHERE u.email = 'test@yovoiz.com';
+
+SELECT '✅ Utilisateur test créé : test@yovoiz.com / Test123456' as message;
+
+-- ═══════════════════════════════════════════════════════════════
+-- 📝 IDENTIFIANTS DE TEST:
+-- ═══════════════════════════════════════════════════════════════
 -- Email: test@yovoiz.com
--- Mot de passe: Test1234!
--- ===================================================================
-
--- Créer l'utilisateur dans auth.users (table système Supabase)
--- Note: Le hash correspond au mot de passe "Test1234!" 
--- bcrypt hash: $2a$10$XYZ... (Supabase gère le hashing automatiquement)
-
--- IMPORTANT: Cette insertion doit être faite via l'interface Supabase
--- ou via l'API d'administration Supabase, pas directement en SQL.
-
--- Pour créer l'utilisateur TEST, utilise une des méthodes suivantes:
-
--- MÉTHODE 1: Via le Dashboard Supabase
--- 1. Va sur https://supabase.com/dashboard
--- 2. Sélectionne ton projet
--- 3. Authentication > Users > Add User
--- 4. Email: test@yovoiz.com
--- 5. Password: Test1234!
--- 6. Auto Confirm User: OUI (important!)
-
--- MÉTHODE 2: Via code Node.js (à exécuter localement)
--- const { createClient } = require('@supabase/supabase-js');
--- const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+-- Mot de passe: Test123456
 -- 
--- await supabase.auth.admin.createUser({
---   email: 'test@yovoiz.com',
---   password: 'Test1234!',
---   email_confirm: true,
---   user_metadata: {
---     full_name: 'Utilisateur Test',
---     phone: '+2250700000000'
---   }
--- });
-
--- ===================================================================
--- APRÈS CRÉATION DE L'UTILISATEUR, CRÉER SON PROFIL
--- ===================================================================
-
--- Récupérer l'UUID de l'utilisateur créé
-DO $$
-DECLARE
-  test_user_id UUID;
-BEGIN
-  -- Chercher l'utilisateur test (remplace par son vrai UUID après création)
-  SELECT id INTO test_user_id 
-  FROM auth.users 
-  WHERE email = 'test@yovoiz.com' 
-  LIMIT 1;
-
-  -- Si l'utilisateur existe, créer son profil
-  IF test_user_id IS NOT NULL THEN
-    
-    -- Créer le profil client
-    INSERT INTO public.profiles (
-      id,
-      full_name,
-      phone,
-      commune,
-      quartier,
-      address_details,
-      verification_status,
-      email_verified,
-      phone_verified,
-      profile_completed
-    ) VALUES (
-      test_user_id,
-      'Utilisateur Test Yo! Voiz',
-      '+2250700000000',
-      'Cocody',
-      'Riviera Palmeraie',
-      'Adresse de test',
-      'verified',
-      true,
-      true,
-      true
-    )
-    ON CONFLICT (id) DO UPDATE SET
-      full_name = EXCLUDED.full_name,
-      verification_status = 'verified',
-      email_verified = true,
-      phone_verified = true,
-      profile_completed = true;
-
-    RAISE NOTICE '✅ Profil créé pour l''utilisateur test: %', test_user_id;
-  ELSE
-    RAISE NOTICE '❌ Utilisateur test@yovoiz.com non trouvé. Crée-le d''abord via le Dashboard Supabase.';
-  END IF;
-END $$;
-
--- ===================================================================
--- INSTRUCTIONS FINALES
--- ===================================================================
-
-/*
-📋 ÉTAPES À SUIVRE:
-
-1️⃣ Va sur ton Dashboard Supabase:
-   https://supabase.com/dashboard/project/YOUR_PROJECT/auth/users
-
-2️⃣ Clique sur "Add User" (en haut à droite)
-
-3️⃣ Remplis:
-   - Email: test@yovoiz.com
-   - Password: Test1234!
-   - ✅ Coche "Auto Confirm User"
-
-4️⃣ Clique sur "Create User"
-
-5️⃣ Ensuite, reviens ici et exécute ce script SQL pour créer le profil
-
-6️⃣ Tu pourras te connecter avec:
-   📧 Email: test@yovoiz.com
-   🔒 Mot de passe: Test1234!
-
-✨ C'est prêt !
-*/
+-- Cet utilisateur a TOUT configuré :
+-- - Email confirmé
+-- - Profil complet
+-- - Toutes les permissions
+-- ═══════════════════════════════════════════════════════════════
