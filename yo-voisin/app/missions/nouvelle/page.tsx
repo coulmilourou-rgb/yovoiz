@@ -119,8 +119,8 @@ export default function NouvelleMission() {
       
       router.push('/dashboard/client');
     } catch (error) {
-      console.error('Erreur création mission:', error);
-      alert('Erreur lors de la création de la mission');
+      console.error('Erreur création demande:', error);
+      alert('Erreur lors de la publication de la demande');
     } finally {
       setLoading(false);
     }
@@ -594,10 +594,10 @@ function Step6Recap({ formData, onSubmit, loading }: any) {
       exit={{ opacity: 0, y: -20 }}
     >
       <h1 className="font-display font-bold text-3xl text-yo-gray-900 mb-2">
-        Récapitulatif de ta mission
+        Récapitulatif de ta demande
       </h1>
       <p className="text-yo-gray-600 mb-8">
-        Vérifie les informations avant de publier ta mission
+        Vérifie les informations avant de publier ta demande
       </p>
 
       <div className="space-y-4 mb-8">
@@ -665,7 +665,7 @@ function Step6Recap({ formData, onSubmit, loading }: any) {
           ) : (
             <>
               <Check className="w-5 h-5" />
-              Publier ma mission
+              Publier ma demande
             </>
           )}
         </Button>

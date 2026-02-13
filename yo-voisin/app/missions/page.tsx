@@ -249,7 +249,7 @@ export default function MissionsPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="font-display font-extrabold text-4xl text-yo-green-dark mb-2">
-            💼 Toutes les missions
+            💼 Toutes les demandes
           </h1>
           <p className="text-yo-gray-600 text-lg">
             Parcourez toutes les demandes de services disponibles
@@ -266,7 +266,7 @@ export default function MissionsPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Rechercher une mission..."
+                placeholder="Rechercher une demande..."
                 className="w-full pl-12 pr-4 py-3 bg-white rounded-lg border-2 border-yo-gray-200 focus:outline-none focus:ring-2 focus:ring-yo-green focus:border-transparent"
               />
             </div>
@@ -377,7 +377,7 @@ export default function MissionsPage() {
         {/* Compteur résultats */}
         <div className="mb-6 flex items-center justify-between">
           <p className="text-yo-gray-600">
-            <span className="font-bold text-yo-green-dark">{missions.length}</span> mission{missions.length > 1 ? 's' : ''} trouvée{missions.length > 1 ? 's' : ''}
+            <span className="font-bold text-yo-green-dark">{missions.length}</span> demande{missions.length > 1 ? 's' : ''} trouvée{missions.length > 1 ? 's' : ''}
           </p>
         </div>
 
@@ -395,7 +395,7 @@ export default function MissionsPage() {
                 <Search className="w-10 h-10 text-yo-gray-400" />
               </div>
               <h3 className="font-display font-bold text-2xl text-yo-gray-800 mb-2">
-                Aucune mission trouvée
+                Aucune demande trouvée
               </h3>
               <p className="text-yo-gray-600 mb-6">
                 Essayez de modifier vos filtres ou revenez plus tard.
@@ -499,7 +499,7 @@ export default function MissionsPage() {
               <div className="mt-8">
                 <Card className="p-6 text-center">
                   <p className="text-yo-gray-500 text-sm">
-                    ✨ Vous avez vu toutes les missions disponibles
+                    ✨ Vous avez vu toutes les demandes disponibles
                   </p>
                 </Card>
               </div>
