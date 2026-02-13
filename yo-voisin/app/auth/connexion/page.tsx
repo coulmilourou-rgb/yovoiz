@@ -43,10 +43,8 @@ export default function ConnexionPage() {
 
       console.log('✅ Connexion réussie, redirection vers /home...');
       
-      // Petit délai pour laisser le temps à l'auth state de se mettre à jour
-      setTimeout(() => {
-        router.push('/home');
-      }, 500);
+      // Redirection immédiate avec window.location (force le rechargement)
+      window.location.href = '/home';
       
     } catch (err) {
       console.error('❌ Exception connexion:', err);
