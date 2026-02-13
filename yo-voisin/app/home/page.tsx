@@ -16,34 +16,53 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
+    // Attendre que le chargement soit terminé
+    if (loading) return;
+
+    // Si pas d'utilisateur, rediriger vers connexion
+    if (!user) {
+      console.log('🔒 Pas d\'utilisateur - Redirection vers connexion');
       router.push('/auth/connexion');
       return;
     }
 
+    // Si utilisateur mais pas encore de profil, attendre
+    if (!profile) {
+      console.log('⏳ Utilisateur connecté mais profil en cours de chargement...');
+      return;
+    }
+
     // Rediriger vers le dashboard approprié selon le rôle
-    if (!loading && profile) {
-      if (profile.role === 'demandeur' || profile.role === 'client') {
-        router.push('/dashboard/client');
-      } else if (profile.role === 'prestataire' || profile.role === 'provider') {
-        router.push('/dashboard/prestataire');
-      } else if (profile.role === 'both') {
-        // Par défaut, rediriger vers le dashboard client pour les utilisateurs "both"
-        // Ils pourront naviguer entre les deux depuis la navbar
-        router.push('/dashboard/client');
-      }
+    console.log('✅ Profil chargé, redirection vers dashboard...');
+    console.log('📊 Rôle:', profile.role);
+
+    if (profile.role === 'demandeur' || profile.role === 'client') {
+      console.log('➡️ Redirection vers /dashboard/client');
+      window.location.replace('/dashboard/client');
+    } else if (profile.role === 'prestataire' || profile.role === 'provider') {
+      console.log('➡️ Redirection vers /dashboard/prestataire');
+      window.location.replace('/dashboard/prestataire');
+    } else if (profile.role === 'both') {
+      console.log('➡️ Redirection vers /dashboard/client (both)');
+      window.location.replace('/dashboard/client');
+    } else {
+      console.warn('⚠️ Rôle inconnu:', profile.role, '- Redirection par défaut vers client');
+      window.location.replace('/dashboard/client');
     }
   }, [user, loading, profile, router]);
 
-  if (loading) {
+  if (loading || !profile) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yo-green"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yo-green mx-auto mb-4"></div>
+          <p className="text-yo-gray-600">Redirection en cours...</p>
+        </div>
       </div>
     );
   }
 
-  if (!user || !profile) {
+  if (!user) {
     return null;
   }
 
