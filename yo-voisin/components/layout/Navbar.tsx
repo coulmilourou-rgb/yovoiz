@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { 
   Search, Bell, LogOut, User, Home, Briefcase, MessageSquare, Settings,
@@ -27,6 +27,24 @@ export const Navbar: React.FC<NavbarProps> = ({ isConnected = false, user, notif
   const [showMenu, setShowMenu] = useState(false);
   const [absenceMode, setAbsenceMode] = useState(false);
   const [availableNow, setAvailableNow] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Fermer le menu quand on clique en dehors
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMenu]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -123,7 +141,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isConnected = false, user, notif
               </button>
 
               {/* Menu utilisateur */}
-              <div className="relative">
+              <div className="relative" ref={menuRef}>
                 <button 
                   onClick={() => setShowMenu(!showMenu)}
                   className="hover:opacity-80 transition"
@@ -138,7 +156,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isConnected = false, user, notif
 
                 {/* Dropdown menu */}
                 {showMenu && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-2xl border border-yo-gray-200 py-2 max-h-[80vh] overflow-y-auto">
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-2xl border border-yo-gray-200 py-2 max-h-[80vh] overflow-y-auto z-50">
                     {/* Header */}
                     <div className="px-4 py-3 border-b border-yo-gray-200">
                       <p className="font-bold text-yo-gray-900">{user.first_name} {user.last_name}</p>
