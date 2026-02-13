@@ -82,13 +82,22 @@ export default function InscriptionPage() {
     setLoading(true);
 
     try {
+      console.log('📝 Données inscription:', {
+        email: formData.email,
+        role: formData.role,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        phone: formData.phone,
+        commune: formData.commune,
+        quartier: formData.quartier,
+      });
+
       const { error: signUpError } = await signUp(
         formData.email,
         formData.password,
         {
-          role: formData.role as 'demandeur' | 'prestataire' | 'both',
-          first_name: formData.first_name,
-          last_name: formData.last_name,
+          user_type: formData.role as 'client' | 'provider' | 'both',
+          full_name: `${formData.first_name} ${formData.last_name}`.trim(),
           phone: formData.phone,
           commune: formData.commune,
           quartier: formData.quartier,
@@ -96,15 +105,21 @@ export default function InscriptionPage() {
       );
 
       if (signUpError) {
-        if (signUpError.message.includes('already registered')) {
+        console.error('❌ Erreur Supabase signUp:', signUpError);
+        console.error('❌ Message:', signUpError.message);
+        console.error('❌ Code:', signUpError.status);
+        
+        if (signUpError.message.includes('already registered') || signUpError.message.includes('already been registered')) {
           setError('Cet email est déjà utilisé');
         } else {
-          setError('Une erreur est survenue lors de l\'inscription');
+          setError(`Erreur: ${signUpError.message}`);
         }
         setLoading(false);
         return;
       }
 
+      console.log('✅ Inscription réussie !');
+      
       // Sauvegarder l'email pour la page de confirmation
       if (typeof window !== 'undefined') {
         localStorage.setItem('pending_email_confirmation', formData.email);
@@ -112,7 +127,8 @@ export default function InscriptionPage() {
 
       goToNextStep();
     } catch (err) {
-      setError('Une erreur inattendue est survenue');
+      console.error('❌ Exception inscription:', err);
+      setError(`Erreur technique: ${err instanceof Error ? err.message : 'Inconnue'}`);
       setLoading(false);
     }
   };
