@@ -98,7 +98,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isConnected = false, user, notif
 
         {/* Menu de navigation (si connecté) */}
         {isConnected && (
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-1 flex-1">
             <Link href="/home" className="px-4 py-2 text-yo-gray-700 hover:bg-yo-gray-100 rounded-lg font-medium transition flex items-center gap-2">
               <Home className="w-4 h-4" />
               Accueil
@@ -126,20 +126,6 @@ export const Navbar: React.FC<NavbarProps> = ({ isConnected = false, user, notif
               <MessageSquare className="w-4 h-4" />
               Messages
             </Link>
-          </div>
-        )}
-
-        {/* Barre de recherche (si connecté) */}
-        {isConnected && (
-          <div className="flex-1 max-w-2xl">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-yo-gray-400" />
-              <input
-                type="text"
-                placeholder="Quel service cherches-tu ?"
-                className="w-full pl-12 pr-4 py-2.5 bg-yo-gray-50 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-yo-green"
-              />
-            </div>
           </div>
         )}
 

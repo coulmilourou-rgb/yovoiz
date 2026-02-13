@@ -159,6 +159,18 @@ export default function HomePage() {
       />
 
       <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Barre de recherche personnalisée */}
+        <div className="mb-6">
+          <div className="relative max-w-3xl">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-yo-gray-400" />
+            <input
+              type="text"
+              placeholder={`Bonjour ${profile.first_name}, que recherchez-vous aujourd'hui ?`}
+              className="w-full pl-16 pr-6 py-4 bg-white rounded-2xl text-base border-2 border-yo-gray-200 focus:outline-none focus:ring-2 focus:ring-yo-green focus:border-transparent shadow-sm"
+            />
+          </div>
+        </div>
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="font-display font-extrabold text-4xl text-yo-green-dark mb-2">
