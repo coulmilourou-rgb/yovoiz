@@ -1,16 +1,17 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
-  MapPin, Clock, Euro, TrendingUp, Filter, 
+  MapPin, Clock, DollarSign, TrendingUp, Filter, 
   Plus, Send, Image as ImageIcon, Paperclip,
   Search, Star, Users, CheckCircle, Loader2
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Navbar } from '@/components/layout/Navbar';
+import { PageHead } from '@/components/layout/PageHead';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -67,7 +68,7 @@ export default function HomePage() {
       setFilterCommune(profile.commune || 'all');
       fetchMissions(profile.commune, 0, true);
     }
-  }, [profile]);
+  }, [profile, selectedCategory]);
 
   // Intersection Observer pour le scroll infini
   useEffect(() => {
@@ -104,11 +105,14 @@ export default function HomePage() {
       const from = pageNum * ITEMS_PER_PAGE;
       const to = from + ITEMS_PER_PAGE - 1;
 
+      // Utiliser la commune de l'utilisateur connecté par défaut si aucune commune n'est spécifiée
+      const targetCommune = commune && commune !== 'all' ? commune : (profile?.commune || undefined);
+
       let query = supabase
-        .from('missions')
+        .from('requests')
         .select(`
           *,
-          client:profiles!missions_client_id_fkey(
+          client:profiles!requests_requester_id_fkey(
             first_name,
             last_name,
             avatar_url,
@@ -120,15 +124,20 @@ export default function HomePage() {
         .order('created_at', { ascending: false })
         .range(from, to);
 
-      // Filtrer par commune si spécifié
-      if (commune && commune !== 'all') {
-        query = query.eq('commune', commune);
+      // Filtrer par commune (priorité : filtre utilisateur > commune du profil)
+      if (targetCommune) {
+        query = query.eq('commune', targetCommune);
+      }
+
+      // Filtrer par urgence si selectedCategory est 'urgent'
+      if (selectedCategory === 'urgent') {
+        query = query.eq('is_urgent', true);
       }
 
       const { data, error, count } = await query;
 
       if (error) {
-        console.error('Erreur chargement missions:', error);
+        console.error('Erreur chargement demandes:', error);
         return;
       }
 
@@ -211,9 +220,14 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-yo-gray-50">
+      <PageHead 
+        title="Accueil" 
+        description="Découvrez les demandes de services dans votre zone et publiez vos propres demandes."
+      />
       <Navbar 
         isConnected={true} 
         user={{
+          id: profile.id,
           first_name: profile.first_name,
           last_name: profile.last_name,
           avatar_url: profile.avatar_url
@@ -229,6 +243,11 @@ export default function HomePage() {
               type="text"
               placeholder={`Bonjour ${profile.first_name}, que recherchez-vous aujourd'hui ?`}
               className="w-full pl-16 pr-6 py-4 bg-white rounded-2xl text-base border-2 border-yo-gray-200 focus:outline-none focus:ring-2 focus:ring-yo-green focus:border-transparent shadow-sm"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                  router.push(`/missions/nouvelle?quick=${encodeURIComponent(e.currentTarget.value)}`);
+                }
+              }}
             />
           </div>
         </div>
@@ -236,7 +255,7 @@ export default function HomePage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="font-display font-extrabold text-4xl text-yo-green-dark mb-2">
-            🏘️ Services près de chez vous
+            Services près de chez vous
           </h1>
           <p className="text-yo-gray-600 text-lg">
             Découvrez les demandes dans votre zone : <span className="font-semibold text-yo-orange">
@@ -247,7 +266,7 @@ export default function HomePage() {
         </div>
 
         {/* Filtres rapides */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex flex-wrap items-center gap-4 mb-6">
           <Button
             variant={filterCommune === 'all' ? 'primary' : 'secondary'}
             onClick={() => handleFilterChange('all')}
@@ -263,6 +282,30 @@ export default function HomePage() {
             <MapPin className="w-4 h-4 mr-2" />
             Ma commune
           </Button>
+          {/* Filtres par urgence */}
+          <div className="flex items-center gap-2 ml-auto">
+            <span className="text-sm text-yo-gray-600">Urgence:</span>
+            <button
+              onClick={() => setSelectedCategory('')}
+              className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
+                selectedCategory === '' 
+                  ? 'bg-yo-orange text-white' 
+                  : 'bg-yo-gray-100 text-yo-gray-600 hover:bg-yo-gray-200'
+              }`}
+            >
+              Toutes
+            </button>
+            <button
+              onClick={() => setSelectedCategory('urgent')}
+              className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
+                selectedCategory === 'urgent' 
+                  ? 'bg-red-500 text-white' 
+                  : 'bg-yo-gray-100 text-yo-gray-600 hover:bg-yo-gray-200'
+              }`}
+            >
+              🔥 Urgent
+            </button>
+          </div>
         </div>
 
         {/* Layout principal : Feed + Quick Post */}
@@ -351,7 +394,7 @@ export default function HomePage() {
                         {mission.category}
                       </Badge>
                       <div className="flex items-center gap-2 font-semibold text-yo-green-dark">
-                        <Euro className="w-4 h-4" />
+                        <DollarSign className="w-4 h-4" />
                         {mission.budget_min} - {mission.budget_max} FCFA
                       </div>
                     </div>

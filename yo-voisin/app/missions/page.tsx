@@ -1,16 +1,17 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
-  MapPin, Euro, Filter, Search, 
+  MapPin, DollarSign, Filter, Search, 
   Users, CheckCircle, Clock, Loader2,
   SlidersHorizontal, X
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Navbar } from '@/components/layout/Navbar';
+import { PageHead } from '@/components/layout/PageHead';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -22,14 +23,15 @@ interface Mission {
   title: string;
   description: string;
   category: string;
-  budget_min: number;
-  budget_max: number;
+  price_fixed_min: number;
+  price_fixed_max: number;
+  price_hourly: number;
+  pricing_type: string;
   status: string;
-  urgency: string;
-  commune: string;
-  quartier: string;
+  communes: string[];
+  available_days: string[];
   created_at: string;
-  client: {
+  provider: {
     first_name: string;
     last_name: string;
     avatar_url?: string;
@@ -122,10 +124,10 @@ export default function MissionsPage() {
       const to = from + ITEMS_PER_PAGE - 1;
 
       let query = supabase
-        .from('missions')
+        .from('service_offers')
         .select(`
           *,
-          client:profiles!missions_client_id_fkey(
+          provider:profiles!service_offers_provider_id_fkey(
             first_name,
             last_name,
             avatar_url,
@@ -133,25 +135,27 @@ export default function MissionsPage() {
             commune
           )
         `, { count: 'exact' })
-        .eq('status', 'published')
+        .eq('status', 'active')
         .order('created_at', { ascending: false })
         .range(from, to);
 
       // Appliquer filtres
+      // Filtrer par commune (priorité : filtre utilisateur > commune du profil)
       if (selectedCommune !== 'all') {
-        query = query.eq('commune', selectedCommune);
+        query = query.contains('communes', [selectedCommune]);
+      } else if (profile?.commune) {
+        // Par défaut, afficher les offres disponibles dans la commune de l'utilisateur
+        query = query.contains('communes', [profile.commune]);
       }
+      
       if (selectedCategory !== 'all') {
         query = query.eq('category', selectedCategory);
       }
-      if (selectedUrgency !== 'all') {
-        query = query.eq('urgency', selectedUrgency);
-      }
       if (budgetMin) {
-        query = query.gte('budget_min', parseInt(budgetMin));
+        query = query.gte('price_fixed_min', parseInt(budgetMin));
       }
       if (budgetMax) {
-        query = query.lte('budget_max', parseInt(budgetMax));
+        query = query.lte('price_fixed_max', parseInt(budgetMax));
       }
 
       const { data, error, count } = await query;
@@ -236,9 +240,14 @@ export default function MissionsPage() {
 
   return (
     <div className="min-h-screen bg-yo-gray-50">
+      <PageHead 
+        title="Missions" 
+        description="Consultez toutes les demandes de services disponibles dans votre zone d'intervention."
+      />
       <Navbar 
         isConnected={true} 
         user={{
+          id: profile.id,
           first_name: profile.first_name,
           last_name: profile.last_name,
           avatar_url: profile.avatar_url
@@ -423,24 +432,22 @@ export default function MissionsPage() {
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <Avatar
-                          firstName={mission.client.first_name}
-                          lastName={mission.client.last_name}
-                          imageUrl={mission.client.avatar_url}
+                          firstName={mission.provider.first_name}
+                          lastName={mission.provider.last_name}
+                          imageUrl={mission.provider.avatar_url}
                           size="sm"
                         />
                         <div>
                           <p className="font-semibold text-sm text-yo-gray-800">
-                            {mission.client.first_name}
+                            {mission.provider.first_name}
                           </p>
                           <p className="text-xs text-yo-gray-500">
-                            {mission.commune}
+                            {mission.communes?.[0] || 'Non spécifié'}
                           </p>
                         </div>
                       </div>
-                      <Badge className={getUrgencyColor(mission.urgency)}>
-                        {mission.urgency === 'urgent' && '🔥'}
-                        {mission.urgency === 'normal' && '📅'}
-                        {mission.urgency === 'flexible' && '⏰'}
+                      <Badge className="bg-green-100 text-green-800">
+                        {mission.pricing_type === 'hourly' ? '💰 Horaire' : '📦 Forfait'}
                       </Badge>
                     </div>
 
@@ -466,10 +473,14 @@ export default function MissionsPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1 font-bold text-yo-green-dark">
-                          <Euro className="w-4 h-4" />
-                          <span className="text-sm">{mission.budget_min} - {mission.budget_max}</span>
+                          <DollarSign className="w-4 h-4" />
+                          <span className="text-sm">
+                            {mission.pricing_type === 'hourly' 
+                              ? `${mission.price_hourly} FCFA/h`
+                              : `${mission.price_fixed_min} - ${mission.price_fixed_max} FCFA`
+                            }
+                          </span>
                         </div>
-                        <span className="text-xs text-yo-gray-500">FCFA</span>
                       </div>
                     </div>
                   </Card>

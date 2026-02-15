@@ -161,6 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       async (event, currentSession) => {
         console.log('🔔 Auth State Change:', event);
         console.log('📦 Nouvelle session:', currentSession ? '✅ Oui' : '❌ Non');
+        console.log('🗺️ Current Path:', typeof window !== 'undefined' ? window.location.pathname : 'N/A');
         
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
@@ -194,10 +195,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }, 100);
         }
         
+        // NE PAS REDIRIGER lors du refresh de token ou session initiale
+        if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+          console.log('🔄 Event:', event, '- Pas de redirection, chargement profil uniquement');
+          if (currentSession?.user) {
+            // Charger le profil silencieusement sans perturber la navigation
+            fetchProfile(currentSession.user.id).catch(err => {
+              console.warn('⚠️ Profil non chargé:', err);
+            });
+          }
+          // Ne JAMAIS rediriger sur TOKEN_REFRESHED ou INITIAL_SESSION
+          return;
+        }
+        
         if (event === 'SIGNED_OUT') {
           console.log('🚪 Event: SIGNED_OUT - Redirection vers /');
           setProfile(null);
-          router.push('/');
+          // Ne rediriger que si pas déjà sur une page publique
+          const publicPaths = ['/', '/auth/connexion', '/auth/inscription'];
+          if (typeof window !== 'undefined' && !publicPaths.includes(window.location.pathname)) {
+            router.push('/');
+          }
         }
       }
     );
