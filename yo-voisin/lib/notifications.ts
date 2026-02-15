@@ -343,3 +343,21 @@ export async function countUnreadNotifications(userId: string): Promise<number> 
     return 0;
   }
 }
+
+/**
+ * Supprime une notification
+ */
+export async function deleteNotification(notificationId: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('notifications')
+      .delete()
+      .eq('id', notificationId);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Erreur deleteNotification:', error);
+    return false;
+  }
+}

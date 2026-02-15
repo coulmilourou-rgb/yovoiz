@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { useAuth } from '@/contexts/AuthContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { 
   Plus, FileText, Send, Download, Eye, 
@@ -15,9 +15,9 @@ import DevisView from '@/components/abonnement/DevisView';
 import DevisSendEmail from '@/components/abonnement/DevisSendEmail';
 import { useNotification } from '@/components/ui/ProNotification';
 import { supabase } from '@/lib/supabase';
-import { generateDevisPDF, downloadPDF } from '@/lib/pdf-generator';
+import { generateDevisPDF } from '@/lib/pdf-generator';
 
-export default function DevisPage() {
+function DevisContent() {
   const { user, profile } = useAuth();
   const { success, error: showError, NotificationContainer } = useNotification();
   const searchParams = useSearchParams();
@@ -509,5 +509,13 @@ export default function DevisPage() {
           />
         )}
     </div>
+  );
+}
+
+export default function DevisPage() {
+  return (
+    <Suspense fallback={<div className="p-6">Chargement...</div>}>
+      <DevisContent />
+    </Suspense>
   );
 }

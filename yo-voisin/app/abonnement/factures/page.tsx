@@ -14,7 +14,7 @@ import FactureView from '@/components/abonnement/FactureView';
 import FactureReminder from '@/components/abonnement/FactureReminder';
 import { useNotification } from '@/components/ui/ProNotification';
 import { supabase } from '@/lib/supabase';
-import { generateFacturePDF, downloadPDF } from '@/lib/pdf-generator';
+import { generateFacturePDF } from '@/lib/pdf-generator';
 
 export default function FacturesPage() {
   const { user, profile } = useAuth();

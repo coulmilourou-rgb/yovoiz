@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { CheckCircle, Clock, Home, FileText } from 'lucide-react';
@@ -10,7 +10,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function DemandeEnvoyeePage() {
+function DemandeEnvoyeeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile } = useAuth();
@@ -166,5 +166,13 @@ export default function DemandeEnvoyeePage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function DemandeEnvoyeePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Chargement...</div>}>
+      <DemandeEnvoyeeContent />
+    </Suspense>
   );
 }
