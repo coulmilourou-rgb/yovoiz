@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, ArrowRight, Check, Upload, 
-  X, Plus, Euro, MapPin, Clock, Calendar
+  X, Plus, DollarSign, MapPin, Clock, Calendar
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -56,8 +56,9 @@ export default function NouvelleOffrePage() {
   ];
 
   const communes = [
-    'Abobo', 'Adjamé', 'Attécoubé', 'Cocody', 'Koumassi',
-    'Marcory', 'Plateau', 'Port-Bouët', 'Treichville', 'Yopougon'
+    'Abobo', 'Adjamé', 'Anyama', 'Attécoubé', 'Bingerville',
+    'Brofodoumé', 'Cocody', 'Koumassi', 'Marcory', 'Plateau',
+    'Port-Bouët', 'Songon', 'Treichville', 'Yopougon'
   ];
 
   const days = [
@@ -147,15 +148,14 @@ export default function NouvelleOffrePage() {
           available_hours_start: formData.available_hours_start,
           available_hours_end: formData.available_hours_end,
           photos: photoUrls,
-          status: 'active'
+          status: 'pending' // En attente de validation admin
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      alert('✅ Offre créée avec succès !');
-      router.push('/services/mes-offres');
+      router.push('/demande-envoyee?type=offre');
     } catch (error: any) {
       console.error('Erreur création offre:', error);
       alert('❌ Erreur: ' + error.message);
@@ -357,7 +357,7 @@ export default function NouvelleOffrePage() {
                           : 'border-yo-gray-200 hover:border-yo-gray-300'
                       }`}
                     >
-                      <Euro className="w-6 h-6 mx-auto mb-2 text-yo-green" />
+                      <DollarSign className="w-6 h-6 mx-auto mb-2 text-yo-green" />
                       <p className="font-semibold text-yo-gray-900">Forfait</p>
                       <p className="text-xs text-yo-gray-600 mt-1">Fourchette de prix fixe</p>
                     </button>

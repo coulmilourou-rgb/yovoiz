@@ -21,14 +21,16 @@ import {
   Calendar,
   DollarSign
 } from 'lucide-react';
+import { NegotiationsTab } from '@/components/dashboard/NegotiationsTab';
 
 interface Mission {
   id: string;
   title: string;
   description: string;
   category: string;
-  budget: number;
-  status: 'published' | 'in_progress' | 'completed' | 'cancelled';
+  budget_min?: number;
+  budget_max?: number;
+  status: 'pending' | 'published' | 'in_progress' | 'completed' | 'cancelled' | 'rejected';
   created_at: string;
   candidates_count?: number;
   selected_provider?: {
@@ -57,6 +59,7 @@ export default function ClientDashboard() {
     pending_reviews: 0
   });
   const [loadingData, setLoadingData] = useState(true);
+  const [activeTab, setActiveTab] = useState<'missions' | 'negotiations'>('missions');
 
   // Charger le profil dès l'arrivée sur le dashboard
   useEffect(() => {
@@ -83,23 +86,23 @@ export default function ClientDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch missions (simplifié - sans relations complexes pour l'instant)
+      // Fetch demandes (table requests)
       const { data: missionsData, error: missionsError } = await supabase
-        .from('missions')
+        .from('requests')
         .select('*')
-        .eq('client_id', user?.id)
+        .eq('requester_id', user?.id)
         .order('created_at', { ascending: false })
         .limit(10);
 
       if (missionsError) {
-        console.error('Erreur chargement missions:', missionsError);
+        console.error('Erreur chargement demandes:', missionsError);
       }
 
       setMissions(missionsData || []);
 
-      // Calculate stats
+      // Calculate stats - inclure pending
       const activeMissions = missionsData?.filter(m => 
-        m.status === 'published' || m.status === 'in_progress'
+        m.status === 'pending' || m.status === 'published' || m.status === 'in_progress'
       ).length || 0;
 
       const completedMissions = missionsData?.filter(m => 
@@ -108,7 +111,7 @@ export default function ClientDashboard() {
 
       const totalSpent = missionsData
         ?.filter(m => m.status === 'completed')
-        .reduce((sum, m) => sum + (m.budget || 0), 0) || 0;
+        .reduce((sum, m) => sum + (m.budget_max || m.budget_min || 0), 0) || 0;
 
       setStats({
         active_missions: activeMissions,
@@ -126,10 +129,12 @@ export default function ClientDashboard() {
 
   const getStatusBadge = (status: Mission['status']) => {
     const statusConfig = {
-      published: { label: 'Publiée', variant: 'success' as const, icon: Clock },
-      in_progress: { label: 'En cours', variant: 'warning' as const, icon: TrendingUp },
-      completed: { label: 'Terminée', variant: 'default' as const, icon: CheckCircle },
-      cancelled: { label: 'Annulée', variant: 'destructive' as const, icon: XCircle }
+      pending: { label: '⏳ En attente validation', variant: 'warning' as const, icon: Clock },
+      published: { label: '✅ Publiée', variant: 'success' as const, icon: CheckCircle },
+      in_progress: { label: '🔄 En cours', variant: 'warning' as const, icon: TrendingUp },
+      completed: { label: '✅ Terminée', variant: 'default' as const, icon: CheckCircle },
+      cancelled: { label: '❌ Annulée', variant: 'destructive' as const, icon: XCircle },
+      rejected: { label: '⛔ Rejetée', variant: 'destructive' as const, icon: XCircle }
     };
 
     const config = statusConfig[status];
@@ -260,76 +265,110 @@ export default function ClientDashboard() {
           </Card>
         </div>
 
-        {/* Missions actives */}
-        <Card className="p-6 mb-8">
-          <h2 className="font-display font-bold text-2xl text-yo-green-dark mb-6">
-            Mes missions
-          </h2>
+        {/* Tabs */}
+        <div className="flex gap-4 mb-6 border-b border-yo-gray-200">
+          <button
+            onClick={() => setActiveTab('missions')}
+            className={`px-6 py-3 font-bold transition-colors relative ${
+              activeTab === 'missions'
+                ? 'text-yo-primary'
+                : 'text-yo-gray-600 hover:text-yo-primary'
+            }`}
+          >
+            📋 Mes demandes
+            {activeTab === 'missions' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-yo-primary" />
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('negotiations')}
+            className={`px-6 py-3 font-bold transition-colors relative ${
+              activeTab === 'negotiations'
+                ? 'text-yo-primary'
+                : 'text-yo-gray-600 hover:text-yo-primary'
+            }`}
+          >
+            💬 Négociations
+            {activeTab === 'negotiations' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-yo-primary" />
+            )}
+          </button>
+        </div>
 
-          {missions.length === 0 ? (
-            <EmptyMissions onCreateMission={() => router.push('/missions/nouvelle')} />
-          ) : (
-            <div className="space-y-4">
-              {missions.map((mission) => (
-                <Card 
-                  key={mission.id} 
-                  className="p-6 hover:shadow-yo-lg transition cursor-pointer"
-                  onClick={() => router.push(`/missions/${mission.id}`)}
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-bold text-lg">{mission.title}</h3>
-                        {getStatusBadge(mission.status)}
-                      </div>
-                      <p className="text-sm text-yo-gray-600 mb-3 line-clamp-2">
-                        {mission.description}
-                      </p>
-                      <div className="flex items-center gap-6 text-sm text-yo-gray-500">
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="w-4 h-4" />
-                          <span className="font-semibold">{mission.budget.toLocaleString()} CFA</span>
+        {/* Tab Content */}
+        {activeTab === 'missions' ? (
+          <Card className="p-6 mb-8">
+            <h2 className="font-display font-bold text-2xl text-yo-green-dark mb-6">
+              Mes demandes
+            </h2>
+
+            {missions.length === 0 ? (
+              <EmptyMissions onCreateMission={() => router.push('/missions/nouvelle')} />
+            ) : (
+              <div className="space-y-4">
+                {missions.map((mission) => (
+                  <Card 
+                    key={mission.id} 
+                    className="p-6 hover:shadow-yo-lg transition cursor-pointer"
+                    onClick={() => router.push(`/missions/${mission.id}`)}
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="font-bold text-lg">{mission.title}</h3>
+                          {getStatusBadge(mission.status)}
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          <span>{new Date(mission.created_at).toLocaleDateString('fr-FR')}</span>
-                        </div>
-                        {mission.candidates_count !== undefined && (
+                        <p className="text-sm text-yo-gray-600 mb-3 line-clamp-2">
+                          {mission.description}
+                        </p>
+                        <div className="flex items-center gap-6 text-sm text-yo-gray-500">
                           <div className="flex items-center gap-1">
-                            <Eye className="w-4 h-4" />
-                            <span>{mission.candidates_count} candidature(s)</span>
+                            <DollarSign className="w-4 h-4" />
+                            <span className="font-semibold">{mission.budget.toLocaleString()} CFA</span>
                           </div>
-                        )}
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            <span>{new Date(mission.created_at).toLocaleDateString('fr-FR')}</span>
+                          </div>
+                          {mission.candidates_count !== undefined && (
+                            <div className="flex items-center gap-1">
+                              <Eye className="w-4 h-4" />
+                              <span>{mission.candidates_count} candidature(s)</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {mission.selected_provider && (
-                    <div className="flex items-center justify-between pt-4 border-t border-yo-gray-200">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-yo-green-pale rounded-full flex items-center justify-center">
-                          <span className="font-bold text-yo-green-dark">
-                            {mission.selected_provider.first_name[0]}
-                          </span>
+                    {mission.selected_provider && (
+                      <div className="flex items-center justify-between pt-4 border-t border-yo-gray-200">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-yo-green-pale rounded-full flex items-center justify-center">
+                            <span className="font-bold text-yo-green-dark">
+                              {mission.selected_provider.first_name[0]}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold">
+                              {mission.selected_provider.first_name} {mission.selected_provider.last_name}
+                            </p>
+                            <p className="text-xs text-yo-gray-500">Prestataire sélectionné</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-semibold">
-                            {mission.selected_provider.first_name} {mission.selected_provider.last_name}
-                          </p>
-                          <p className="text-xs text-yo-gray-500">Prestataire sélectionné</p>
-                        </div>
+                        <Button variant="outline" size="sm">
+                          <MessageCircle className="w-4 h-4 mr-2" />
+                          Contacter
+                        </Button>
                       </div>
-                      <Button variant="outline" size="sm">
-                        <MessageCircle className="w-4 h-4 mr-2" />
-                        Contacter
-                      </Button>
-                    </div>
-                  )}
-                </Card>
-              ))}
-            </div>
-          )}
-        </Card>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            )}
+          </Card>
+        ) : (
+          <NegotiationsTab />
+        )}
       </div>
     </div>
   );

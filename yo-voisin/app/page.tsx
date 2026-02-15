@@ -187,6 +187,23 @@ function HeroSection({ onOpenVideo }: { onOpenVideo: () => void }) {
   const [searchValue, setSearchValue] = useState('');
   const [selectedCity, setSelectedCity] = useState(COMMUNES[6]); // Cocody par défaut
 
+  const handleSearch = () => {
+    if (!searchValue.trim()) return;
+    
+    // Rediriger vers la page de recherche avec les paramètres
+    const searchParams = new URLSearchParams({
+      q: searchValue,
+      commune: selectedCity
+    });
+    window.location.href = `/search?${searchParams.toString()}`;
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   return (
     <section className="relative bg-gradient-to-br from-yo-green-dark via-yo-green to-yo-green-light py-24 px-6 overflow-hidden">
       {/* Cercles décoratifs animés */}
@@ -261,6 +278,7 @@ function HeroSection({ onOpenVideo }: { onOpenVideo: () => void }) {
                 placeholder="Quel service cherches-tu ? (ex: ménage, bricolage...)"
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
+                onKeyPress={handleKeyPress}
                 className="w-full outline-none text-yo-gray-800 placeholder:text-yo-gray-400 text-base"
               />
             </div>
@@ -286,7 +304,12 @@ function HeroSection({ onOpenVideo }: { onOpenVideo: () => void }) {
             </div>
 
             {/* Bouton */}
-            <Button size="lg" variant="secondary" className="shrink-0 font-bold shadow-yo-md hover:shadow-yo-lg transition-all">
+            <Button 
+              size="lg" 
+              variant="secondary" 
+              className="shrink-0 font-bold shadow-yo-md hover:shadow-yo-lg transition-all"
+              onClick={handleSearch}
+            >
               Rechercher
             </Button>
           </div>
@@ -304,6 +327,13 @@ function HeroSection({ onOpenVideo }: { onOpenVideo: () => void }) {
                 key={term}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  const searchParams = new URLSearchParams({
+                    q: term,
+                    commune: selectedCity
+                  });
+                  window.location.href = `/search?${searchParams.toString()}`;
+                }}
                 className="px-4 py-1.5 bg-white/20 hover:bg-white/30 text-white text-sm rounded-full backdrop-blur-md border border-white/30 transition shadow-lg hover:shadow-xl"
               >
                 {term}
@@ -319,10 +349,12 @@ function HeroSection({ onOpenVideo }: { onOpenVideo: () => void }) {
           transition={{ duration: 0.8, delay: 0.8 }}
           className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
-          <Button size="lg" className="bg-white text-yo-green-dark hover:bg-white/90 shadow-xl hover:scale-105 transition-transform">
-            <Wrench className="w-5 h-5" />
-            Devenir prestataire
-          </Button>
+          <a href="/devenir-prestataire">
+            <Button size="lg" className="bg-white text-yo-green-dark hover:bg-white/90 shadow-xl hover:scale-105 transition-transform">
+              <Wrench className="w-5 h-5" />
+              Devenir prestataire
+            </Button>
+          </a>
           <button 
             onClick={onOpenVideo}
             className="flex items-center gap-2 text-white hover:text-white/80 transition group"
@@ -633,7 +665,7 @@ function CategoriesSection() {
 
 function CategoryCard({ category }: { category: any }) {
   return (
-    <div className="flex flex-col items-center gap-3 cursor-pointer hover:scale-110 transition-transform">
+    <a href={`/home?category=${category.id}`} className="flex flex-col items-center gap-3 cursor-pointer hover:scale-110 transition-transform">
       <div
         className="w-16 h-16 rounded-yo-md flex items-center justify-center text-3xl shadow-yo-sm hover:shadow-yo-md transition-shadow"
         style={{ backgroundColor: category.color }}
@@ -643,7 +675,7 @@ function CategoryCard({ category }: { category: any }) {
       <span className="text-xs font-semibold text-yo-gray-600 text-center leading-tight">
         {category.label}
       </span>
-    </div>
+    </a>
   );
 }
 
@@ -963,14 +995,18 @@ function FinalCTASection() {
           Rejoins les <strong>847 utilisateurs</strong> qui font déjà confiance à Yo! Voiz
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" className="bg-white text-yo-orange hover:bg-white/90 text-lg">
-            <Users className="w-5 h-5" />
-            S'inscrire gratuitement
-          </Button>
-          <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/10">
-            <MessageCircle className="w-5 h-5" />
-            Nous contacter
-          </Button>
+          <a href="/auth/inscription">
+            <Button size="lg" className="bg-white text-yo-orange hover:bg-white/90 text-lg">
+              <Users className="w-5 h-5" />
+              S'inscrire gratuitement
+            </Button>
+          </a>
+          <a href="/aide">
+            <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/10">
+              <MessageCircle className="w-5 h-5" />
+              Nous contacter
+            </Button>
+          </a>
         </div>
         <p className="mt-6 text-white/70 text-sm">
           ✓ Inscription gratuite • ✓ Sans engagement • ✓ Support 7j/7
@@ -1011,21 +1047,21 @@ function Footer() {
           <div>
             <h3 className="font-bold mb-4">Plateforme</h3>
             <ul className="space-y-2 text-white/70">
-              <li><a href="#" className="hover:text-white transition">Comment ça marche</a></li>
-              <li><a href="#" className="hover:text-white transition">Devenir prestataire</a></li>
-              <li><a href="#" className="hover:text-white transition">Catégories</a></li>
-              <li><a href="#" className="hover:text-white transition">Tarifs</a></li>
-              <li><a href="#" className="hover:text-white transition">Blog</a></li>
+              <li><a href="/comment-ca-marche" className="hover:text-white transition">Comment ça marche</a></li>
+              <li><a href="/devenir-prestataire" className="hover:text-white transition">Devenir prestataire</a></li>
+              <li><a href="/categories" className="hover:text-white transition">Catégories</a></li>
+              <li><a href="/tarifs" className="hover:text-white transition">Tarifs</a></li>
+              <li><a href="/blog" className="hover:text-white transition">Blog</a></li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-bold mb-4">Légal & Sécurité</h3>
             <ul className="space-y-2 text-white/70">
-              <li><a href="#" className="hover:text-white transition">CGU</a></li>
-              <li><a href="#" className="hover:text-white transition">Politique de confidentialité</a></li>
-              <li><a href="#" className="hover:text-white transition">Mentions légales</a></li>
-              <li><a href="#" className="hover:text-white transition">Charte de confiance</a></li>
+              <li><a href="/conditions-generales" className="hover:text-white transition">CGU</a></li>
+              <li><a href="/confidentialite" className="hover:text-white transition">Politique de confidentialité</a></li>
+              <li><a href="/mentions-legales" className="hover:text-white transition">Mentions légales</a></li>
+              <li><a href="/charte-confiance" className="hover:text-white transition">Charte de confiance</a></li>
             </ul>
           </div>
 
@@ -1057,9 +1093,9 @@ function Footer() {
             <span className="text-xs">Plateforme 100% ivoirienne de services entre voisins</span>
           </p>
           <div className="flex gap-6 text-white/70 text-sm">
-            <a href="#" className="hover:text-white transition">Presse</a>
-            <a href="#" className="hover:text-white transition">Carrières</a>
-            <a href="#" className="hover:text-white transition">Partenaires</a>
+            <a href="/presse" className="hover:text-white transition">Presse</a>
+            <a href="/carrieres" className="hover:text-white transition">Carrières</a>
+            <a href="/partenaires" className="hover:text-white transition">Partenaires</a>
           </div>
         </div>
       </div>

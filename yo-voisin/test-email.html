@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Email Notification - Yo!Voiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #1B7A3D, #F97316);
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    h1 {
+      color: #1B7A3D;
+      text-align: center;
+    }
+    .logo {
+      text-align: center;
+      font-size: 48px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .logo .yo { color: #F97316; }
+    .logo .voiz { color: #1B7A3D; }
+    button {
+      background: #F97316;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #E86305;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      display: none;
+    }
+    .success {
+      background: #D1FAE5;
+      border: 2px solid #10B981;
+      color: #065F46;
+    }
+    .error {
+      background: #FEE2E2;
+      border: 2px solid #EF4444;
+      color: #991B1B;
+    }
+    .loading {
+      text-align: center;
+      color: #666;
+    }
+    pre {
+      background: #F3F4F6;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <span class="yo">Yo!</span><span class="voiz">Voiz</span>
+    </div>
+    <h1>🧪 Test de Notification Email</h1>
+    <p style="text-align: center; color: #666;">
+      Cliquez sur le bouton ci-dessous pour envoyer un email de test à<br>
+      <strong>coulmilourou@gmail.com</strong>
+    </p>
+
+    <button id="testBtn" onclick="sendTestEmail()">
+      📧 Envoyer un Email de Test
+    </button>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    async function sendTestEmail() {
+      const btn = document.getElementById('testBtn');
+      const result = document.getElementById('result');
+      
+      btn.disabled = true;
+      btn.textContent = '⏳ Envoi en cours...';
+      result.style.display = 'block';
+      result.className = 'loading';
+      result.innerHTML = '<p>🔄 Appel de la fonction en cours...</p>';
+
+      try {
+        const response = await fetch('https://hfrmctsvpszqdizritoe.supabase.co/functions/v1/send-email-notification', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhmcm1jdHN2cHN6cWRpenJpdG9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg5MTI2NjksImV4cCI6MjA1NDQ4ODY2OX0.FBDgcNMo3RM9ZMRPekKjlI2BqgJnJqPXcZNmHDmYikg'
+          },
+          body: JSON.stringify({
+            type: 'request_validated',
+            userId: '8b8cb0f0-6712-445b-a9ed-a45aa78638d2',
+            data: {
+              requestId: 'test-browser-' + Date.now(),
+              title: 'Test email depuis le navigateur',
+              category: 'cleaning',
+              createdAt: new Date().toISOString()
+            }
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          result.className = 'success';
+          result.innerHTML = `
+            <h3>✅ Email envoyé avec succès !</h3>
+            <p><strong>Destinataire :</strong> ${data.recipient || 'coulmilourou@gmail.com'}</p>
+            <p><strong>Status HTTP :</strong> ${response.status}</p>
+            <p><strong>Message :</strong> ${data.message}</p>
+            <hr>
+            <p><strong>📬 Vérifiez maintenant :</strong></p>
+            <ol>
+              <li>Votre boîte de réception Gmail</li>
+              <li>Le dossier <strong>SPAM</strong></li>
+              <li>Cherchez "Yo!Voiz" dans l'expéditeur</li>
+            </ol>
+            <p style="margin-top: 15px; padding: 10px; background: #FEF3C7; border-radius: 5px;">
+              ⚠️ <strong>Si vous ne voyez rien :</strong> L'email peut prendre 1-2 minutes à arriver.
+            </p>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        } else {
+          result.className = 'error';
+          result.innerHTML = `
+            <h3>❌ Erreur lors de l'envoi</h3>
+            <p><strong>Status HTTP :</strong> ${response.status}</p>
+            <p><strong>Erreur :</strong> ${data.error || 'Erreur inconnue'}</p>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        }
+      } catch (error) {
+        result.className = 'error';
+        result.innerHTML = `
+          <h3>❌ Erreur réseau</h3>
+          <p><strong>Message :</strong> ${error.message}</p>
+          <p>Vérifiez votre connexion internet et réessayez.</p>
+        `;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🔄 Envoyer un Autre Test';
+      }
+    }
+  </script>
+</body>
+</html>

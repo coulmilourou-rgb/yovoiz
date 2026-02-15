@@ -90,37 +90,40 @@ export default function NouvelleMission() {
         return;
       }
 
-      // Créer la mission
-      const { data: mission, error } = await supabase
-        .from('missions')
+      // Créer la demande (table requests)
+      const { data: request, error } = await supabase
+        .from('requests')
         .insert({
-          client_id: user.id,
+          requester_id: user.id,
           title: formData.title,
           description: formData.description,
-          category: formData.category, // TEMPORAIRE : à remplacer par category_id
+          category_id: formData.category || 'autre', // Utiliser category_id
           commune: formData.commune,
-          quartier: formData.quartier || null,
-          address: formData.address_details || formData.commune, // address requis
-          budget_min: formData.budget_min ? parseInt(formData.budget_min) : null,
-          budget_max: formData.budget_max ? parseInt(formData.budget_max) : null,
-          urgency: formData.urgency,
+          quartier: formData.quartier || '',
+          address: formData.address_details || `${formData.quartier}, ${formData.commune}`,
+          budget_min: formData.budget_min ? parseFloat(formData.budget_min) : null,
+          budget_max: formData.budget_max ? parseFloat(formData.budget_max) : null,
+          is_urgent: formData.urgency === 'immediate',
           preferred_date: formData.preferred_date || null,
-          status: 'published',
+          status: 'pending', // En attente de validation admin
+          published_at: null, // Sera défini lors de l'approbation
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 jours
         })
         .select()
         .single();
 
       if (error) {
-        console.error('Erreur Supabase détaillée:', error);
+        console.error('❌ Erreur Supabase détaillée:', error);
         console.error('Message:', error.message);
         console.error('Details:', error.details);
         console.error('Hint:', error.hint);
+        alert(`Erreur création: ${error.message || 'Erreur inconnue'}`);
         throw error;
       }
 
       // TODO: Upload des images si présentes
       
-      router.push('/dashboard/client');
+      router.push('/demande-envoyee?type=demande');
     } catch (error) {
       console.error('Erreur création demande:', error);
       alert('Erreur lors de la publication de la demande');
@@ -309,7 +312,7 @@ function Step1Category({ formData, updateField, onNext }: any) {
           animate={{ opacity: 1, y: 0 }}
         >
           <label className="block mb-2 font-semibold text-yo-gray-900">
-            Donne un titre à ta mission
+            Donne un titre à ta demande
           </label>
           <Input
             type="text"

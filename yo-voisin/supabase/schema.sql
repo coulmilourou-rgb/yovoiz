@@ -55,11 +55,28 @@ CREATE TABLE profiles (
   provider_bio TEXT,
   provider_experience_years INTEGER DEFAULT 0,
   
+  -- Système d'abonnement Pro
+  is_pro BOOLEAN DEFAULT false,
+  pro_started_at TIMESTAMPTZ,
+  pro_expires_at TIMESTAMPTZ,
+  commission_rate DECIMAL(4,3) DEFAULT 0.05, -- 5% standard, 3% Pro
+  
+  -- Informations supplémentaires
+  quartier VARCHAR(100),
+  date_naissance DATE,
+  phone_verified BOOLEAN DEFAULT false,
+  email_notifications BOOLEAN DEFAULT true,
+  sms_notifications BOOLEAN DEFAULT true,
+  service_zones TEXT[], -- Zones d'intervention pour prestataires
+  categories TEXT[], -- Catégories de services
+  
   -- Statistiques prestataire
   total_missions INTEGER DEFAULT 0,
   completed_missions INTEGER DEFAULT 0,
   cancelled_missions INTEGER DEFAULT 0,
   average_rating DECIMAL(2,1) DEFAULT 0.0,
+  total_ratings INTEGER DEFAULT 0,
+  response_time_avg INTEGER DEFAULT 24, -- Temps de réponse moyen en heures
   total_earnings DECIMAL(10,2) DEFAULT 0.00,
   available_balance DECIMAL(10,2) DEFAULT 0.00,
   

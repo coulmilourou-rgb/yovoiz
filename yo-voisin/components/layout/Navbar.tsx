@@ -8,26 +8,23 @@ import {
   Shield, UserCircle, Users, Plus, Crown
 } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
+import { NotificationsDropdown } from '@/components/layout/NotificationsDropdown';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 
 interface NavbarProps {
-  isConnected?: boolean;
-  user?: {
-    first_name: string;
-    last_name: string;
-    avatar_url?: string;
-  };
-  notificationCount?: number;
+  // Les props sont optionnelles, la Navbar utilise useAuth par défaut
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ isConnected = false, user, notificationCount = 0 }) => {
-  const { signOut } = useAuth();
+export const Navbar: React.FC<NavbarProps> = () => {
+  const { user, profile, signOut } = useAuth();
   const router = useRouter();
   const [showMenu, setShowMenu] = useState(false);
   const [absenceMode, setAbsenceMode] = useState(false);
   const [availableNow, setAvailableNow] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const isConnected = !!user && !!profile;
 
   // Fermer le menu quand on clique en dehors
   useEffect(() => {
@@ -120,26 +117,21 @@ export const Navbar: React.FC<NavbarProps> = ({ isConnected = false, user, notif
             </Link>
             <Link href="/abonnement" className="px-4 py-2 text-yo-gray-700 hover:bg-yo-gray-100 rounded-lg font-medium transition flex items-center gap-2">
               <Crown className="w-4 h-4" />
-              Abonnement
+              Abonnement Pro
             </Link>
             <Link href="/messages" className="px-4 py-2 text-yo-gray-700 hover:bg-yo-gray-100 rounded-lg font-medium transition flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
-              Messages
+              Messagerie
             </Link>
           </div>
         )}
 
         {/* Actions */}
         <div className="flex items-center gap-4 ml-auto">
-          {isConnected && user ? (
+          {isConnected ? (
             <>
               {/* Notifications */}
-              <button className="relative p-2 hover:bg-yo-gray-100 rounded-full transition">
-                <Bell className="w-6 h-6 text-yo-gray-600" />
-                {notificationCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-yo-orange rounded-full" />
-                )}
-              </button>
+              <NotificationsDropdown userId={user!.id} />
 
               {/* Menu utilisateur */}
               <div className="relative" ref={menuRef}>
@@ -148,9 +140,9 @@ export const Navbar: React.FC<NavbarProps> = ({ isConnected = false, user, notif
                   className="hover:opacity-80 transition"
                 >
                   <Avatar
-                    firstName={user.first_name}
-                    lastName={user.last_name}
-                    imageUrl={user.avatar_url}
+                    firstName={profile!.first_name}
+                    lastName={profile!.last_name}
+                    imageUrl={profile!.avatar_url || undefined}
                     size="md"
                   />
                 </button>
@@ -160,7 +152,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isConnected = false, user, notif
                   <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-2xl border border-yo-gray-200 py-2 max-h-[80vh] overflow-y-auto z-50">
                     {/* Header */}
                     <div className="px-4 py-3 border-b border-yo-gray-200">
-                      <p className="font-bold text-yo-gray-900">{user.first_name} {user.last_name}</p>
+                      <p className="font-bold text-yo-gray-900">{profile!.first_name} {profile!.last_name}</p>
                       <p className="text-sm text-yo-gray-500">Mon compte</p>
                     </div>
 
@@ -171,7 +163,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isConnected = false, user, notif
                       </div>
                       
                       <Link 
-                        href="/mes-demandes"
+                        href="/profile/requests"
                         className="flex items-center justify-between px-4 py-2.5 hover:bg-yo-gray-50 transition group"
                         onClick={() => setShowMenu(false)}
                       >
@@ -183,7 +175,19 @@ export const Navbar: React.FC<NavbarProps> = ({ isConnected = false, user, notif
                       </Link>
                       
                       <Link 
-                        href="/mes-paiements"
+                        href="/services/mes-offres"
+                        className="flex items-center justify-between px-4 py-2.5 hover:bg-yo-gray-50 transition group"
+                        onClick={() => setShowMenu(false)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Briefcase className="w-4 h-4 text-yo-gray-600 group-hover:text-yo-green" />
+                          <span className="text-yo-gray-700 group-hover:text-yo-gray-900">Mes Services</span>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-yo-gray-400" />
+                      </Link>
+                      
+                      <Link 
+                        href="/profile/payments"
                         className="flex items-center justify-between px-4 py-2.5 hover:bg-yo-gray-50 transition group"
                         onClick={() => setShowMenu(false)}
                       >
@@ -255,7 +259,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isConnected = false, user, notif
                       </div>
                       
                       <Link 
-                        href="/profile/informations"
+                        href="/profile/info"
                         className="flex items-center justify-between px-4 py-2.5 hover:bg-yo-gray-50 transition group"
                         onClick={() => setShowMenu(false)}
                       >

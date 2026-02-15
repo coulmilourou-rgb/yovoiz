@@ -2,7 +2,7 @@
 
 export type UserRole = 'demandeur' | 'prestataire' | 'both' | 'admin';
 export type VerificationStatus = 'pending' | 'submitted' | 'verified' | 'rejected';
-export type RequestStatus = 'open' | 'in_progress' | 'completed' | 'cancelled' | 'disputed';
+export type RequestStatus = 'pending' | 'published' | 'in_progress' | 'completed' | 'cancelled' | 'disputed' | 'rejected';
 export type QuoteStatus = 'pending' | 'accepted' | 'rejected' | 'expired';
 export type PaymentStatus = 'pending' | 'escrow' | 'released' | 'refunded' | 'disputed';
 export type ProviderLevel = 'bronze' | 'silver' | 'gold' | 'platinum';
